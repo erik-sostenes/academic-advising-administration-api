@@ -1,64 +1,47 @@
 package schedule
 
 import (
+	"context"
 	"errors"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/itsoeh/academy-advising-administration-api/internal/model"
+	"github.com/itsoeh/academy-advising-administration-api/internal/repository"
 )
 
-var testCreateSchedule = map[string] struct{
-	scheduleId string 
-	scheduleAt string
-	fromDate string
-	toDate string
-	teacherTuition string
-	expectError error
+var testScheduleRepositoryCreateSchedule = struct{
+	name            string
+	scheduleId      string
+	scheduleAt      string
+	fromDate        string
+	toDate          string
+	teacherTuititon string
+	errExpect       error
 }{
-	"": {
-		scheduleId: "9dac8d9c-c280-11ec-9d64-0242ac120002",
-		scheduleAt: "2022-04-01T08:41:50Z",
-		fromDate: "2022-04-01T08:41:50Z",
-		toDate: "2022-04-01T08:41:50Z",
-		teacherTuition: "128DHNR80",
-		expectError: errors.New(""),
-	},
-	"Incorrect": {
-		scheduleId: "d83fcdfc-c280-11ec-9d64-0242ac120002",
-		scheduleAt: "2022-04-01T08:41:50Z",
-		fromDate: "2022-04-01T08:41:50Z",
-		toDate: "2022-04-01T08:41:50Z",
-		teacherTuition: "128DHNR80",
-		expectError: errors.New(""),
-	},
+		name: "",
+		scheduleId: "ea58a0be-c3a6-11ec-9d64-0242ac120002",
+		scheduleAt: "2006-01-02 15:04:05",
+		fromDate: "2006-01-02 15:04:05",
+		toDate: "2006-01-02 15:04:05",
+		teacherTuititon: "APM7392HH",
+		errExpect: model.StatusBadRequest("Check that all information fields of the advisory are correct."),
 }
 
 func Test_ScheduleRepository_CreateSchedule(t *testing.T) {
-	for name, tt := range testCreateSchedule {
-		tt := tt
-		t.Run(name, func(t *testing.T) {
-			schedule, err := model.NewMockSchedule(tt.scheduleId, tt.scheduleAt, tt.fromDate, tt.toDate, tt.teacherTuition)	
-
-			if err != nil {
-				t.Log(err)
-			}
-
-			db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual)))
-			if err != nil {
-				t.Log(err)
-			}
-			sqlmock.ExpectedExec(
-				insertTeacherSchedules).
-				WithArgs(tt.scheduleId, tt.scheduleAt, tt.fromDate, tt.toDate, tt.teacherTuition).
-				WillReturnResults(sqlmock.NewResult(0,1))
+	tt := testScheduleRepositoryCreateSchedule
 		
-			repo := NewScheduleRepository(db)
+	t.Run(tt.name, func(t *testing.T) {
+		schedule, err := model.NewMockSchedule(tt.scheduleId, tt.scheduleAt, tt.fromDate, tt.toDate, tt.teacherTuititon)
+		if err != nil {
+			t.Error(err)
+		}
 
-			err = repo.Create(schedule)
-			if err != nil {
-				t.Log(err)
-			}
-		})
-	} 
+		DB := repository.NewDB()
+		rep := NewScheduleStorer(DB)
+		err  = rep.StoreCreateSchedule(context.Background(), schedule)
+			
+		if !errors.Is(err, tt.errExpect) {
+			t.Fatal(err)
+		}
+	})
 }
