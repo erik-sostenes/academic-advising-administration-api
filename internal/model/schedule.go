@@ -3,19 +3,20 @@ package model
 import (
 	"strings"
 	"time"
+
 	"github.com/google/uuid"
 )
 
 // Declaring layout constant
-const layout = "2006-Jan-02"
+const layout = "2006-01-02 15:04:05"
 
 // MockSchedule represent a Schedule
 type MockSchedule struct {
-	scheduleId     string
-	scheduleAt     time.Time
-	fromDate       time.Time
-	toDate 	       time.Time 
-	teacherTuition string	
+	ScheduleId     string
+	ScheduleAt     time.Time
+	FromDate       time.Time
+	ToDate 	       time.Time 
+	TeacherTuition string	
 }
 
 // NewMockSchedule returns an instance of MockSchedule if everything is correct
@@ -45,11 +46,11 @@ func NewMockSchedule(scheduleId string, scheduleAt, fromDate, toDate, teacherTui
 		return &MockSchedule{}, err
 	}
 	return &MockSchedule{
-		scheduleId: uuid.String(),
-		scheduleAt: scheduleAtV,
-		fromDate: fromDateV,
-		toDate: toDateV,
-		teacherTuition: teacherTuitionV,
+		ScheduleId: uuid.String(),
+		ScheduleAt: scheduleAtV,
+		FromDate: fromDateV,
+		ToDate: toDateV,
+		TeacherTuition: teacherTuitionV,
 	}, nil
 }
 
