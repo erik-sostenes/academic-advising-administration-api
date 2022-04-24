@@ -18,7 +18,7 @@ var testScheduleRepositoryCreateSchedule = struct{
 	teacherTuititon string
 	errExpect       error
 }{
-		name: "",
+		name: "Test 1. StatusBadRequest: Invalid Fields Error",
 		scheduleId: "ea58a0be-c3a6-11ec-9d64-0242ac120002",
 		scheduleAt: "2006-01-02 15:04:05",
 		fromDate: "2006-01-02 15:04:05",
