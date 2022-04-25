@@ -19,17 +19,18 @@ var ErrInvalidTeacherTuition = StatusBadRequest("Invalid Teacher Tuition.");
 const layout = "2006-01-02 15:04:05"
 
 
-// MockSchedule represents the mock of a teacher's schedule
+// MockSchedule represents the mock of a schedule
 type MockSchedule struct {
-	scheduleId     string
-	scheduleAt     string
-	fromDate       string
-	toDate 	       string 
-	teacherTuition string	
+	scheduleId        string
+	scheduleAt        string
+	fromDate          string
+	toDate 	          string 
+	studentAccountant uint8
+	teacherTuition    string	
 }
 
 // NewMockSchedule returns an instance of MockSchedule if everything is correct
-func NewMockSchedule(scheduleId, scheduleAt, fromDate, toDate, teacherTuition string) (MockSchedule, error) {
+func NewMockSchedule(scheduleId, scheduleAt, fromDate, toDate, teacherTuition string, studentAccountant uint8) (MockSchedule, error) {
 	uuid, err  := newScheduleId(scheduleId)
 	if err != nil {
 		return MockSchedule{}, err
@@ -59,6 +60,7 @@ func NewMockSchedule(scheduleId, scheduleAt, fromDate, toDate, teacherTuition st
 		scheduleAt: scheduleAtV,
 		fromDate: fromDateV,
 		toDate: toDateV,
+		studentAccountant: studentAccountant,
 		teacherTuition: teacherTuitionV,
 	}, nil
 }
@@ -81,6 +83,10 @@ func (m *MockSchedule) ToDate() string {
 // TeacherTuition represents the teacher's unique tuition
 func (m *MockSchedule) TeacherTuition() string {
 	return m.teacherTuition
+}
+// StudentAccountant represents the total number of students who are taking academic advice on that date 
+func (m *MockSchedule) StudentAccountant() uint8 {
+	return m.studentAccountant
 }
 
 
