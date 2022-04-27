@@ -10,6 +10,6 @@ type Schedule struct {
 	ScheduleAt 	  time.Time `json:"schedule_at"`
 	FromDate 	  time.Time `json:"from_date"`
 	ToDate 		  time.Time `json:"to_date"`
-	TeacherTuition 	  string    `json:"teacher_tuition"`
 	StudentAccountant uint8     `json:"student_accountant"`
+	TeacherTuition 	  string    `json:"teacher_tuition"`
 }

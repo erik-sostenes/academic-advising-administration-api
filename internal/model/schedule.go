@@ -3,95 +3,116 @@ package model
 import (
 	"strings"
 	"time"
+
 	"github.com/google/uuid"
 )
 
-// Declaring layout constant
-const layout = "2006-Jan-02"
+// ErrInvalidScheduleId error schedule id is invalid
+var ErrInvalidScheduleId = StatusBadRequest("Invalid Schedule Id.")
+// ErrInvalidTime error date parse occurs
+var ErrInvalidTime = StatusBadRequest("Invalid Time.")
+// ErrInvalidTeacherTuition error Teacher Tuition 
+var ErrInvalidTeacherTuition = StatusBadRequest("Invalid Teacher Tuition.");
 
-// MockSchedule represent a Schedule
+
+// Declaring layout constant
+const layout = "2006-01-02 15:04:05"
+
+
+// MockSchedule represents the mock of a teacher's schedule
 type MockSchedule struct {
 	scheduleId     string
-	scheduleAt     time.Time
-	fromDate       time.Time
-	toDate 	       time.Time 
+	scheduleAt     string
+	fromDate       string
+	toDate 	       string 
 	teacherTuition string	
 }
 
 // NewMockSchedule returns an instance of MockSchedule if everything is correct
-func NewMockSchedule(scheduleId string, scheduleAt, fromDate, toDate, teacherTuition string) (*MockSchedule, error) {
-	uuid, err  := NewScheduleId(scheduleId)
+func NewMockSchedule(scheduleId, scheduleAt, fromDate, toDate, teacherTuition string) (MockSchedule, error) {
+	uuid, err  := newScheduleId(scheduleId)
 	if err != nil {
-		return &MockSchedule{}, err
+		return MockSchedule{}, err
 	}
 
-	scheduleAtV, err := NewTime(scheduleAt)
+	scheduleAtV, err := newTime(scheduleAt)
 	if err != nil {
-		return &MockSchedule{}, err
+		return MockSchedule{}, err
 	}
 
-	fromDateV, err := NewTime(fromDate)
+	fromDateV, err := newTime(fromDate)
 	if err != nil {
-		return &MockSchedule{}, err
+		return MockSchedule{}, err
 	}
 
-	toDateV, err := NewTime(toDate)
+	toDateV, err := newTime(toDate)
 	if err != nil {
-		return &MockSchedule{}, err
+		return MockSchedule{}, err
 	}
 
-	teacherTuitionV, err := NewTeacherTuition(teacherTuition)
+	teacherTuitionV, err := newTeacherTuition(teacherTuition)
 	if err != nil {
-		return &MockSchedule{}, err
+		return MockSchedule{}, err
 	}
-	return &MockSchedule{
-		scheduleId: uuid.String(),
+	return MockSchedule{
+		scheduleId: uuid,
 		scheduleAt: scheduleAtV,
 		fromDate: fromDateV,
 		toDate: toDateV,
 		teacherTuition: teacherTuitionV,
 	}, nil
 }
+// ScheduleId represents the teacher schedule unique identifier
+func (m *MockSchedule) ScheduleId() string {
+	return m.scheduleId
+}
+// ScheduleAt represents the date the teacher's schedule was created
+func (m *MockSchedule) ScheduleAt() string {
+	return m.scheduleAt
+}
+// FromDate represents the start date of the academic advisory
+func (m *MockSchedule) FromDate() string {
+	return m.fromDate
+}
+// ToDate represents the end date of the academic advisory
+func (m *MockSchedule) ToDate() string {
+	return m.toDate 
+}
+// TeacherTuition represents the teacher's unique tuition
+func (m *MockSchedule) TeacherTuition() string {
+	return m.teacherTuition
+}
 
-var ErrInvalidScheduleId = StatusBadRequest("Invalid Schedule Id.")
 
-// NewScheduleId returns a new value of uuid.UUID 
-func NewScheduleId(scheduleId string) (value uuid.UUID, err error) {
-	value, err = uuid.Parse(scheduleId)
+// newScheduleId returns a new value of uuid.UUID 
+func newScheduleId(scheduleId string) (string, error) {
+	v, err := uuid.Parse(scheduleId)
 
 	if err != nil {
-		err = ErrInvalidScheduleId
-		return 
+		return "", ErrInvalidScheduleId
 	} 
 
-	return 
+	return v.String(), nil
 }
 
 
-var ErrInvalidTime = StatusBadRequest("Invalid Time.")
-
-// NewTime returns a new value of time.Time
-func NewTime(value string) (t time.Time, err error) {
-	t, err = time.Parse(layout, value)
+// newTime validates that a string has the correct format of a date 
+func newTime(value string) (string, error) {
+	_, err := time.Parse(layout, value)
 
 		if err != nil {
-			err = ErrInvalidTime 
-			return 
+			return "", ErrInvalidTime 
 		}
 
-	return 
+		return  value, nil 
 }
 
-var ErrInvalidTeacherTuition = StatusBadRequest("Invalid Teacher Tuition.");
+// newTeacherTuition returns a string if the teacherTuition is valid
+func newTeacherTuition(teacherTuition string) (string, error) {
 
-// NewTeacherTuition returns a string if the teacherTuition is valid
-func NewTeacherTuition(teacherTuition string) (value string, err error) {
-	value = teacherTuition
-
-	if strings.TrimSpace(value) == "" {
-		err = ErrInvalidTeacherTuition
-		return
+	if strings.TrimSpace(teacherTuition) == "" {
+		return "", ErrInvalidTeacherTuition
 	}
 
-	return
+	return teacherTuition, nil
 }
