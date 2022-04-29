@@ -33,7 +33,7 @@ func (m *MockTeacherSchedule) SurnameTeacher() string {
 	return m.surnameTeacher
 }
 // MockSchedule represents the mock of a schedule 
-func (m *MockTeacherSchedule) MockSchedule() MockSchedule {
-	return m.mockSchedule
+func (m *MockTeacherSchedule) MockSchedule() *MockSchedule {
+	return &m.mockSchedule
 }
 
