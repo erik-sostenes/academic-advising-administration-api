@@ -11,10 +11,10 @@ import (
 
 // ScheduleService contains the methods that are responsible for verifying that the business logic is correct
 type ScheduleService interface {
-	// CreateSchedule returns a new model.MockSchedule 
+	// CreateSchedule create a new model.MockSchedule 
 	CreateSchedule(ctx context.Context, scheduleId, scheduleAt, fromDate, toDate, teacherTuition string) error 
-	// StoreGetSchedulesByTeacherTuition  returns a new model.MockTeacherSchedules
-	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.MockTeacherSchedules, error)
+	// StoreGetSchedulesByTeacherTuition  returns a model.MockTeacherSchedules and error
+	GetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.TeacherSchedules, error)
 }
 
 // ScheduleService implements the ScheduleService interface
@@ -39,10 +39,10 @@ func (s scheduleService) CreateSchedule(ctx context.Context, scheduleId, schedul
 }
 
 
-func (s scheduleService) StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.MockTeacherSchedules, error) {
+func (s scheduleService) GetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.TeacherSchedules, error) {
 	teacherIdVO, isActiveVO, err :=  s.checkQueryParameters(teacherId, isActive)	
 	if err != nil {
-		return model.MockTeacherSchedules{}, err
+		return model.TeacherSchedules{}, err
 	}
 
 	return s.scheduleStorer.StoreGetSchedulesByTeacherTuition(ctx, teacherIdVO, isActiveVO)

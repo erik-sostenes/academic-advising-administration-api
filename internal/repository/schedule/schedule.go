@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -16,7 +15,7 @@ type ScheduleStorer interface {
 	// StoreCreateSchedule method that create a new teacher schedule 
 	StoreCreateSchedule(context.Context, model.MockSchedule) error
 	// StoreGetSchedulesByTeacherTuition method that gets a collection of teacher schedules by teacherId and if the schedule is active. 
-	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (model.MockTeacherSchedules, error) 
+	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (model.TeacherSchedules, error) 
 }
 
 type scheduleStorer struct {
@@ -63,7 +62,7 @@ func (s *scheduleStorer) StoreCreateSchedule(ctx context.Context, schedule model
 	return
 }
 
-func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (mock model.MockTeacherSchedules, err error) {
+func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (_ model.TeacherSchedules, err error) {
 	queryCTx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
@@ -71,44 +70,31 @@ func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context,
 	defer rows.Close()
 
 	if err != nil {
-		log.Println(err)
 		err = model.InternalServerError("An error has ocurred while obtainig the teacher schedule.")
 		return 
 	}
+	
+	var teacherSchedules model.TeacherSchedules
 
 	for rows.Next() {
-		var day, teacherName, surnameTeacher string
-		var scheduleId, scheduleAt, fromDate, toDate, teacherTuition string	
-		var studentAccountant uint8
+		var teacherSchedule model.TeacherSchedule
 
 		if err = rows.Scan(
-			&day,
-			&teacherName,
-			&surnameTeacher,
-			&scheduleId,
-			&scheduleAt,
-			&fromDate,
-			&toDate,
-			&studentAccountant,
-			&teacherTuition,
+			&teacherSchedule.Day,
+			&teacherSchedule.TeacherName,
+			&teacherSchedule.SurnameTeacher,
+			&teacherSchedule.Schedule.ScheduleId,
+			&teacherSchedule.Schedule.ScheduleAt,
+			&teacherSchedule.Schedule.FromDate,
+			&teacherSchedule.Schedule.ToDate,
+			&teacherSchedule.Schedule.StudentAccountant,
+			&teacherSchedule.Schedule.TeacherTuition,
 		); err != nil {
 			err = model.InternalServerError(fmt.Sprintf("teacher schedule: %v", err))
 			return
 		}
 
-		mockSchedule, errM  := model.NewMockSchedule(scheduleId, scheduleAt, fromDate, toDate, teacherTuition, studentAccountant)
-		if errM != nil {
-			err = errM
-			return 
-		}
-		
-		mockTeacherSchedule, errM := model.NewMockTeacherSchedule(day, teacherName, surnameTeacher, mockSchedule)
-		if errM != nil {
-			err = errM
-			return 
-		}
-
-		mock = append(mock, mockTeacherSchedule)
+		teacherSchedules = append(teacherSchedules, teacherSchedule)
 	}
 	return	
 } 
