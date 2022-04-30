@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/itsoeh/academy-advising-administration-api/internal/model"
 	"github.com/itsoeh/academy-advising-administration-api/internal/repository/schedule"
 )
@@ -12,7 +13,7 @@ import (
 // ScheduleService contains the methods that are responsible for verifying that the business logic is correct
 type ScheduleService interface {
 	// CreateSchedule create a new model.MockSchedule 
-	CreateSchedule(ctx context.Context, scheduleId, scheduleAt, fromDate, toDate, teacherTuition string) error 
+	CreateSchedule(ctx context.Context, scheduleAt, fromDate, toDate, teacherTuition string) error 
 	// StoreGetSchedulesByTeacherTuition  returns a model.MockTeacherSchedules and error
 	GetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.TeacherSchedules, error)
 }
@@ -29,7 +30,9 @@ func NewScheduleService(scheduleStorer schedule.ScheduleStorer) ScheduleService 
 	}
 }
 
-func (s scheduleService) CreateSchedule(ctx context.Context, scheduleId, scheduleAt, fromDate, toDate, teacherTuition string) error {
+func (s scheduleService) CreateSchedule(ctx context.Context, scheduleAt, fromDate, toDate, teacherTuition string) error {
+	scheduleId := uuid.New().String()
+
 	schedule, err := model.NewMockSchedule(scheduleId, scheduleAt, fromDate, toDate, teacherTuition, 0)
 	if err != nil {
 		return err

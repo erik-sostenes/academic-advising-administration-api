@@ -62,7 +62,7 @@ func (s *scheduleStorer) StoreCreateSchedule(ctx context.Context, schedule model
 	return
 }
 
-func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (_ model.TeacherSchedules, err error) {
+func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) ( model.TeacherSchedules, error) {
 	queryCTx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
@@ -71,7 +71,7 @@ func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context,
 
 	if err != nil {
 		err = model.InternalServerError("An error has ocurred while obtainig the teacher schedule.")
-		return 
+		return model.TeacherSchedules{}, err
 	}
 	
 	var teacherSchedules model.TeacherSchedules
@@ -91,11 +91,11 @@ func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context,
 			&teacherSchedule.Schedule.TeacherTuition,
 		); err != nil {
 			err = model.InternalServerError(fmt.Sprintf("teacher schedule: %v", err))
-			return
+			return model.TeacherSchedules{}, err
 		}
 
 		teacherSchedules = append(teacherSchedules, teacherSchedule)
 	}
-	return	
+	return teacherSchedules, err	
 } 
 

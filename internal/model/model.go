@@ -21,5 +21,5 @@ type TeacherSchedule struct {
 // TeacherSchedules 
 type TeacherSchedules []TeacherSchedule 
 
-// Response map used for http response in json format
+// Response map used for http response error
 type Response map[string] interface{}
