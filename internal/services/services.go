@@ -5,16 +5,17 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/itsoeh/academy-advising-administration-api/internal/model"
 	"github.com/itsoeh/academy-advising-administration-api/internal/repository/schedule"
 )
 
 // ScheduleService contains the methods that are responsible for verifying that the business logic is correct
 type ScheduleService interface {
-	// CreateSchedule returns a new model.MockSchedule 
-	CreateSchedule(ctx context.Context, scheduleId, scheduleAt, fromDate, toDate, teacherTuition string) error 
-	// StoreGetSchedulesByTeacherTuition  returns a new model.MockTeacherSchedules
-	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.MockTeacherSchedules, error)
+	// CreateSchedule create a new model.MockSchedule 
+	CreateSchedule(ctx context.Context, scheduleAt, fromDate, toDate, teacherTuition string) error 
+	// StoreGetSchedulesByTeacherTuition  returns a model.MockTeacherSchedules and error
+	GetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.TeacherSchedules, error)
 }
 
 // ScheduleService implements the ScheduleService interface
@@ -29,7 +30,9 @@ func NewScheduleService(scheduleStorer schedule.ScheduleStorer) ScheduleService 
 	}
 }
 
-func (s scheduleService) CreateSchedule(ctx context.Context, scheduleId, scheduleAt, fromDate, toDate, teacherTuition string) error {
+func (s scheduleService) CreateSchedule(ctx context.Context, scheduleAt, fromDate, toDate, teacherTuition string) error {
+	scheduleId := uuid.New().String()
+
 	schedule, err := model.NewMockSchedule(scheduleId, scheduleAt, fromDate, toDate, teacherTuition, 0)
 	if err != nil {
 		return err
@@ -39,10 +42,10 @@ func (s scheduleService) CreateSchedule(ctx context.Context, scheduleId, schedul
 }
 
 
-func (s scheduleService) StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.MockTeacherSchedules, error) {
+func (s scheduleService) GetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.TeacherSchedules, error) {
 	teacherIdVO, isActiveVO, err :=  s.checkQueryParameters(teacherId, isActive)	
 	if err != nil {
-		return model.MockTeacherSchedules{}, err
+		return model.TeacherSchedules{}, err
 	}
 
 	return s.scheduleStorer.StoreGetSchedulesByTeacherTuition(ctx, teacherIdVO, isActiveVO)

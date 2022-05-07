@@ -1,17 +1,13 @@
 package model
 
-import (
-	"time"
-)
-
 // Schedule represents a schedule 
 type Schedule struct {
-	ScheduleId 	  string    `json:"schedule_id"`
-	ScheduleAt 	  time.Time `json:"schedule_at"`
-	FromDate 	  time.Time `json:"from_date"`
-	ToDate 		  time.Time `json:"to_date"`
-	StudentAccountant uint8     `json:"student_accountant"`
-	TeacherTuition 	  string    `json:"teacher_tuition"`
+	ScheduleId 	      string `json:"schedule_id"`
+	ScheduleAt 	      string `json:"schedule_at"`
+	FromDate 	        string `json:"from_date"`
+	ToDate 		        string `json:"to_date"`
+	StudentAccountant uint8  `json:"student_accountant"`
+	TeacherTuition 	  string `json:"teacher_tuition"`
 }
 
 // TeacherSchedule represents a teacher schedule
@@ -21,3 +17,9 @@ type TeacherSchedule struct {
 	SurnameTeacher string   `json:"surname"`
 	Schedule       Schedule `json:"schedule"`
 }
+
+// TeacherSchedules 
+type TeacherSchedules []TeacherSchedule 
+
+// Response map used for http response error
+type Response map[string] interface{}
