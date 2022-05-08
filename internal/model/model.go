@@ -1,6 +1,8 @@
 package model
 
-// Schedule represents a schedule 
+import "github.com/dgrijalva/jwt-go"
+
+// Schedule represents a schedule
 type Schedule struct {
 	ScheduleId 	      string `json:"schedule_id"`
 	ScheduleAt 	      string `json:"schedule_at"`
@@ -23,3 +25,15 @@ type TeacherSchedules []TeacherSchedule
 
 // Response map used for http response error
 type Response map[string] interface{}
+
+// Login structure
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+// Claim structure
+type Claim struct {
+	Email string `json:"email"`
+	jwt.StandardClaims
+}
+
