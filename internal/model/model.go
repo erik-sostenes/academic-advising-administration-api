@@ -28,12 +28,14 @@ type Response map[string] interface{}
 
 // Login structure
 type Login struct {
+	Tuition  string `json:"tuition"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 // Claim structure
 type Claim struct {
-	Email string `json:"email"`
+	Tuition string `json:"tuition"`
+	Email   string `json:"email"`
 	jwt.StandardClaims
 }
 

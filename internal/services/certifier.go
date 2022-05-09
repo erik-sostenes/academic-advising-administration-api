@@ -8,13 +8,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/itsoeh/academy-advising-administration-api/internal/model"
 )
-
-// Certifier will have the method for upload certificates and parse with JWT
-type Certifier interface{
-	// Certificates is a singleton method to load the certificates
-	Certificates(publicCertificate, privateCertificate string) error
-}
-
 // variables
 var (
 	syncOnce sync.Once
@@ -22,13 +15,11 @@ var (
 	verifyKey * rsa.PublicKey
 )
 
-type certifier struct {}
+// Certifier will have the method for upload certificates and parse with JWT
+type Certifier struct {}
 
-func NewCertifier() Certifier {
-	return &certifier{}
-}
-
-func (c *certifier) Certificates(publicCertificate, privateCertificate string) (err error) {
+// Certificates is a singleton method to load the certificates
+func (c *Certifier) Certificates(publicCertificate, privateCertificate string) (err error) {
 	syncOnce.Do(func() {
 		err = c.certificates(publicCertificate, privateCertificate)
 	})
@@ -36,7 +27,7 @@ func (c *certifier) Certificates(publicCertificate, privateCertificate string) (
 }
 
 // certificates load the certificates
-func (c *certifier) certificates(publicCertificate, privateCertificate string) (err error) {
+func (c *Certifier) certificates(publicCertificate, privateCertificate string) (err error) {
 publicBytes, err := ioutil.ReadFile(publicCertificate)
 	if err != nil {
 		err = model.InternalServerError("The public certificate not fount.")
@@ -52,7 +43,7 @@ publicBytes, err := ioutil.ReadFile(publicCertificate)
 }
 
 // parseRSA parse the certificates with JWT
-func (c *certifier) parseRSA(public, private []byte) (err error) {
+func (c *Certifier) parseRSA(public, private []byte) (err error) {
 	verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(public)
 	if err != nil {
 		return
