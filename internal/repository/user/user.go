@@ -9,10 +9,10 @@ import (
 
 // UserStorer interface containing the methods to interact with the MySQL database
 type UserStorer interface {
-	// StorageGetStudentByTuition method to get a student password
-	StorageGetStudentByTuition(ctx context.Context, tuition string) (string, error)
-	// StorageGetTeacherByTuition method to get a teacher password
-	StorageGetTeacherByTuition(ctx context.Context, tuition string) (string, error) 
+	// StorageGetStudentPasswordByTuition method to get a student password
+	StorageGetStudentPaswordByTuition(ctx context.Context, tuition string) (string, error)
+	// StorageGetTeacherPasswordByTuition method to get a teacher password
+	StorageGetTeacherPasswordByTuition(ctx context.Context, tuition string) (string, error) 
 }
 
 type userStorer struct {
@@ -26,7 +26,7 @@ func NewUserStorer(DB *sql.DB) UserStorer {
 	}
 }
 
-func (u *userStorer) StorageGetStudentByTuition(ctx context.Context, tuition string) (string, error) {
+func (u *userStorer) StorageGetStudentPaswordByTuition(ctx context.Context, tuition string) (string, error) {
 	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
@@ -43,7 +43,7 @@ func (u *userStorer) StorageGetStudentByTuition(ctx context.Context, tuition str
 	return password, nil 
 }
 
-func (u *userStorer) StorageGetTeacherByTuition(ctx context.Context, tuition string) (string, error) {
+func (u *userStorer) StorageGetTeacherPasswordByTuition(ctx context.Context, tuition string) (string, error) {
 	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
