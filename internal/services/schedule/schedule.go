@@ -1,4 +1,4 @@
-package services
+package schedule
 
 import (
 	"context"
@@ -38,7 +38,7 @@ func (s scheduleService) CreateSchedule(ctx context.Context, scheduleAt, fromDat
 		return err
 	}
 	
-	return s.scheduleStorer.StoreCreateSchedule(ctx, schedule)
+	return s.scheduleStorer.StorageCreateSchedule(ctx, schedule)
 }
 
 
@@ -48,7 +48,7 @@ func (s scheduleService) GetSchedulesByTeacherTuition(ctx context.Context, teach
 		return model.TeacherSchedules{}, err
 	}
 
-	return s.scheduleStorer.StoreGetSchedulesByTeacherTuition(ctx, teacherIdVO, isActiveVO)
+	return s.scheduleStorer.StorageGetSchedulesByTeacherTuition(ctx, teacherIdVO, isActiveVO)
 }
 
 // checkQueryParameters method that verifies the query parameters are correct
