@@ -13,9 +13,9 @@ import (
 // ScheduleStorer interface containing the methods to interact with the MySQL database
 type ScheduleStorer interface {
 	// StoreCreateSchedule method that create a new teacher schedule 
-	StoreCreateSchedule(context.Context, model.MockSchedule) error
+	StorageCreateSchedule(context.Context, model.MockSchedule) error
 	// StoreGetSchedulesByTeacherTuition method that gets a collection of teacher schedules by teacherId and if the schedule is active. 
-	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (model.TeacherSchedules, error) 
+	StorageGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (model.TeacherSchedules, error) 
 }
 
 type scheduleStorer struct {
@@ -29,7 +29,7 @@ func NewScheduleStorer(DB *sql.DB) ScheduleStorer {
 	}
 }
 
-func (s *scheduleStorer) StoreCreateSchedule(ctx context.Context, schedule model.MockSchedule) (err error) {
+func (s *scheduleStorer) StorageCreateSchedule(ctx context.Context, schedule model.MockSchedule) (err error) {
 	queryCTx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel() 
 
@@ -62,7 +62,7 @@ func (s *scheduleStorer) StoreCreateSchedule(ctx context.Context, schedule model
 	return
 }
 
-func (s *scheduleStorer) 	StoreGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) ( model.TeacherSchedules, error) {
+func (s *scheduleStorer) 	StorageGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) ( model.TeacherSchedules, error) {
 	queryCTx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
