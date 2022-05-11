@@ -1,26 +1,28 @@
 package server
 
 import (
-	"log"
-
 	"github.com/itsoeh/academy-advising-administration-api/internal/handlers"
-	"github.com/itsoeh/academy-advising-administration-api/internal/services"
+	a "github.com/itsoeh/academy-advising-administration-api/internal/handlers/middleware"
+	"github.com/itsoeh/academy-advising-administration-api/internal/services/schedule"
+	"github.com/itsoeh/academy-advising-administration-api/internal/services/user"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	m "github.com/labstack/echo/v4/middleware"
 )
 
 type server struct {
 	port string
 	engine *echo.Echo
-	services services.ScheduleService
+	scheduleService schedule.ScheduleService
+	userService user.UserService
 }
 
 // NewServer to start the server
-func NewServer(port string, services services.ScheduleService) server {
+func NewServer(port string, schedule schedule.ScheduleService, user user.UserService) server {
 	s :=  server{
 		port: port,
 		engine: echo.New(),
-		services: services,
+		scheduleService: schedule,
+		userService: user,
 	}
 
 	s.SetAllEndpoints()
@@ -30,8 +32,6 @@ func NewServer(port string, services services.ScheduleService) server {
 
 // Run will start running the program on the defined port
 func (s *server) Run() error {
-	log.Printf("Initialize server on the port %v", s.port)
-
 	return  s.engine.Start(s.port)
 }
 
@@ -40,10 +40,13 @@ func (s *server) SetAllEndpoints() {
 	h := handlers.NewHandlers()
 
 	// Add middlewares 
-	s.engine.Use(middleware.Logger(), middleware.Recover(), middleware.CORS())
+	s.engine.Use(m.Logger(), m.Recover(), m.CORS())
 
 	route := s.engine.Group("/v1/itsoeh/academic-advising-administration-api")
 
-	route.POST("/create", h.Schedule.CreateHandler(s.services))
-	route.GET("/get/:teacher_id/:is_active", h.Schedule.GetHandler(s.services))
+	route.POST("/create", a.Authentication(h.Schedule.HandlerCreateTeacherSchedule(s.scheduleService)))
+	route.GET("/get/:teacher_id/:is_active", a.Authentication(h.Schedule.HandlerGetTeacherSchedule(s.scheduleService)))
+
+	route.GET("/student-authorization", h.User.StudentLoginHandler(s.userService))
+	route.GET("/teacher-authorization", h.User.TeacherLoginHandler(s.userService))
 }
