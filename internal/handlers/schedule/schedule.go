@@ -3,8 +3,8 @@ package schedule
 import (
 	"net/http"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
-	"github.com/itsoeh/academy-advising-administration-api/internal/services/schedule"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/services/schedule"
 	"github.com/labstack/echo/v4"
 )
 

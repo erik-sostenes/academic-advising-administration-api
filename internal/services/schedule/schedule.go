@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
-	"github.com/itsoeh/academy-advising-administration-api/internal/repository/schedule"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository/schedule"
 )
 
 // ScheduleService contains the methods that are responsible for verifying that the business logic is correct

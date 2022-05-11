@@ -1,10 +1,10 @@
 package server
 
 import (
-	"github.com/itsoeh/academy-advising-administration-api/internal/handlers"
-	a "github.com/itsoeh/academy-advising-administration-api/internal/handlers/middleware"
-	"github.com/itsoeh/academy-advising-administration-api/internal/services/schedule"
-	"github.com/itsoeh/academy-advising-administration-api/internal/services/user"
+	"github.com/itsoeh/academic-advising-administration-api/internal/handlers"
+	a "github.com/itsoeh/academic-advising-administration-api/internal/handlers/middleware"
+	"github.com/itsoeh/academic-advising-administration-api/internal/services/schedule"
+	"github.com/itsoeh/academic-advising-administration-api/internal/services/user"
 	"github.com/labstack/echo/v4"
 	m "github.com/labstack/echo/v4/middleware"
 )

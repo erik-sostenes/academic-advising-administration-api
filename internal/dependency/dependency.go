@@ -4,13 +4,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/repository"
-	"github.com/itsoeh/academy-advising-administration-api/internal/repository/schedule"
-	"github.com/itsoeh/academy-advising-administration-api/internal/repository/user"
-	"github.com/itsoeh/academy-advising-administration-api/internal/server"
-	"github.com/itsoeh/academy-advising-administration-api/internal/services"
-	s "github.com/itsoeh/academy-advising-administration-api/internal/services/schedule"
-	u "github.com/itsoeh/academy-advising-administration-api/internal/services/user"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository/schedule"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository/user"
+	"github.com/itsoeh/academic-advising-administration-api/internal/server"
+	"github.com/itsoeh/academic-advising-administration-api/internal/services"
+	s "github.com/itsoeh/academic-advising-administration-api/internal/services/schedule"
+	u "github.com/itsoeh/academic-advising-administration-api/internal/services/user"
 )
 
 const defaultPort = ":9090"

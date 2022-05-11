@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
 	"golang.org/x/crypto/bcrypt"
 )
 

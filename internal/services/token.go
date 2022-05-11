@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
 )
 
 // Token structure whose task is to generate and validate a token

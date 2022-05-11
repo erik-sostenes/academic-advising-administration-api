@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
 )
 
 // ScheduleStorer interface containing the methods to interact with the MySQL database

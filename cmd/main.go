@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/dependency"
+	"github.com/itsoeh/academic-advising-administration-api/internal/dependency"
 )
 
 func main() {

@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
-	"github.com/itsoeh/academy-advising-administration-api/internal/repository/user"
-	"github.com/itsoeh/academy-advising-administration-api/internal/services"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository/user"
+	"github.com/itsoeh/academic-advising-administration-api/internal/services"
 )
 // ScheduleService contains the methods that are responsible for verifying that the business logic is correct
 // and give authorization to the user, if it meets all the requirements
