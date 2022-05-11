@@ -10,10 +10,10 @@ import (
 
 // ScheduleHandler contains all http handlers to receive requests and responses from schedules
 type ScheduleHandler interface {
-	// CreateHandler http handler that is responsible for creating a consultancy through a request 
-	CreateHandler(schedule.ScheduleService) echo.HandlerFunc
-	// GetHandler http http that is responsible for responding to all the schedules that a teacher has
-	GetHandler(schedule.ScheduleService) echo.HandlerFunc
+	// HandlerCreateTeacherSchedule http handler which is responsible for creating a teacher schedule via request
+	HandlerCreateTeacherSchedule(schedule.ScheduleService) echo.HandlerFunc
+	// HandlerGetTeacherSchedule http http that is responsible for responding to all the schedules that a teacher has
+	HandlerGetTeacherSchedule(schedule.ScheduleService) echo.HandlerFunc
 }
 
 type scheduleHandler struct {}
@@ -23,7 +23,7 @@ func NewScheduleHandler() ScheduleHandler {
 	return &scheduleHandler{}
 }
 
-func (*scheduleHandler) CreateHandler(services schedule.ScheduleService) echo.HandlerFunc {
+func (*scheduleHandler) HandlerCreateTeacherSchedule(services schedule.ScheduleService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		schedule := &model.Schedule{}
 
@@ -47,7 +47,7 @@ func (*scheduleHandler) CreateHandler(services schedule.ScheduleService) echo.Ha
 	}
 } 
 
-func (*scheduleHandler) GetHandler(services schedule.ScheduleService) echo.HandlerFunc {
+func (*scheduleHandler) HandlerGetTeacherSchedule(services schedule.ScheduleService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		teacherSchedules, err := services.GetSchedulesByTeacherTuition(c.Request().Context(), c.Param("teacher_id"), c.Param("is_active"))
 
