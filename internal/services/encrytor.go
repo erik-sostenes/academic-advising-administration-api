@@ -11,14 +11,14 @@ type Encrytor struct {}
 // EncryptPassword will encrypt the password
 func (e *Encrytor) EncryptPassword(password string)(string, error){
 	encryptPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost) 
-	return string(encryptPassword), err
+	return string(encryptPassword), model.InternalServerError(err.Error())
 }
 
 // ValidatePassword validate the encrypted password if correct
 func (e *Encrytor) ValidatePassword(hashedPassword, password string) (err error) {
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
-		err = model.Forbidden("Your password is incorrect.")
+		err = model.Forbidden("Your password is forbidden.")
 		return
 	}
 	return
