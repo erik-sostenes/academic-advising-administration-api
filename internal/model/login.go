@@ -21,6 +21,7 @@ type MockLogin struct {
 	email    string 
 	password string 
 }
+
 // NewMockLogin returns an instance of MockLogin if everything is correct
 func NewMockLogin(tuition, email, password string) (MockLogin, error) {
 	tuition, err := setTuition(tuition);
@@ -35,7 +36,7 @@ func NewMockLogin(tuition, email, password string) (MockLogin, error) {
 	
 	password, err = setPassword(password)
 	if err != nil {
-		return MockLogin{}, nil
+		return MockLogin{}, err
 	}
 
 	return MockLogin{

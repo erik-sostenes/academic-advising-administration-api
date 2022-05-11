@@ -28,7 +28,7 @@ func (c *Certifier) Certificates(publicCertificate, privateCertificate string) (
 
 // certificates load the certificates
 func (c *Certifier) certificates(publicCertificate, privateCertificate string) (err error) {
-publicBytes, err := ioutil.ReadFile(publicCertificate)
+	publicBytes, err := ioutil.ReadFile(publicCertificate)
 	if err != nil {
 		err = model.InternalServerError("The public certificate not fount.")
 		return

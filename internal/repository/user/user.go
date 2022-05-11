@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/itsoeh/academy-advising-administration-api/internal/model"
 )
 
 // UserStorer interface containing the methods to interact with the MySQL database
@@ -35,9 +37,9 @@ func (u *userStorer) StorageGetStudentPaswordByTuition(ctx context.Context, tuit
 		&password,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("canPurchase %s: unknown student", tuition)
+			return "", model.NotFound(fmt.Sprintf("Student with tuition %s not found", tuition))
   	}
-  	return "", fmt.Errorf("canPurchase %s", tuition)
+  	return "", model.InternalServerError(err.Error())
 	}
 
 	return password, nil 
@@ -52,10 +54,9 @@ func (u *userStorer) StorageGetTeacherPasswordByTuition(ctx context.Context, tui
 		&password,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("canPurchase %s: unknown teacher", tuition)
+			return "", model.NotFound(fmt.Sprintf("Teacher with tuition %s not found", tuition))
   	}
-  	return "", fmt.Errorf("canPurchase %s", tuition)
-
+  	return "",  model.InternalServerError(err.Error())
 	}
 
 	return password, nil 
