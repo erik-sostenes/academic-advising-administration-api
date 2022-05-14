@@ -1,10 +1,11 @@
 package server
 
 import (
-	"github.com/itsoeh/academic-advising-administration-api/internal/handlers"
-	a "github.com/itsoeh/academic-advising-administration-api/internal/handlers/middleware"
-	"github.com/itsoeh/academic-advising-administration-api/internal/services/schedule"
-	"github.com/itsoeh/academic-advising-administration-api/internal/services/user"
+	"github.com/itsoeh/academy-advising-administration-api/internal/handlers"
+	a "github.com/itsoeh/academy-advising-administration-api/internal/handlers/middleware"
+	"github.com/itsoeh/academy-advising-administration-api/internal/services/schedule"
+	"github.com/itsoeh/academy-advising-administration-api/internal/services/teacher"
+	"github.com/itsoeh/academy-advising-administration-api/internal/services/user"
 	"github.com/labstack/echo/v4"
 	m "github.com/labstack/echo/v4/middleware"
 )
@@ -14,15 +15,17 @@ type server struct {
 	engine *echo.Echo
 	scheduleService schedule.ScheduleService
 	userService user.UserService
+	teacherService teacher.TeacherService
 }
 
 // NewServer to start the server
-func NewServer(port string, schedule schedule.ScheduleService, user user.UserService) server {
+func NewServer(port string, schedule schedule.ScheduleService, user user.UserService, teacher teacher.TeacherService) server {
 	s :=  server{
 		port: port,
 		engine: echo.New(),
 		scheduleService: schedule,
 		userService: user,
+		teacherService: teacher,	
 	}
 
 	s.SetAllEndpoints()
@@ -49,4 +52,8 @@ func (s *server) SetAllEndpoints() {
 
 	route.GET("/student-authorization", h.User.StudentLoginHandler(s.userService))
 	route.GET("/teacher-authorization", h.User.TeacherLoginHandler(s.userService))
+
+	route.GET("/find-teachers/:subject_id/:university_course_id", a.Authentication(
+		h.Teacher.HandlerFindTeachersByCareerAndSubject(s.teacherService),
+	))
 }

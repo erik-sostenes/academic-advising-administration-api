@@ -1,13 +1,16 @@
 package handlers
 
 import (
-	"github.com/itsoeh/academic-advising-administration-api/internal/handlers/schedule"
-	"github.com/itsoeh/academic-advising-administration-api/internal/handlers/user"
+	"github.com/itsoeh/academy-advising-administration-api/internal/handlers/schedule"
+	"github.com/itsoeh/academy-advising-administration-api/internal/handlers/teacher"
+	"github.com/itsoeh/academy-advising-administration-api/internal/handlers/user"
+
 )
 
 // Handlers structure that manages the handlers
 type handlers struct {
 	Schedule schedule.ScheduleHandler
+	Teacher teacher.TeacherHandler
 	User user.UserHandler
 }
 
@@ -15,6 +18,7 @@ type handlers struct {
 func NewHandlers() *handlers {
 	return  &handlers{
 		Schedule: schedule.NewScheduleHandler(),
+		Teacher: teacher.NewTeacherHandler(),
 		User: user.NewUserHandler(),
 	}
 }
