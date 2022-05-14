@@ -90,7 +90,7 @@ func (s *scheduleStorer) 	StorageGetSchedulesByTeacherTuition(ctx context.Contex
 			&teacherSchedule.Schedule.StudentAccountant,
 			&teacherSchedule.Schedule.TeacherTuition,
 		); err != nil {
-			err = model.InternalServerError(fmt.Sprintf("teacher schedule: %v", err))
+			err = model.InternalServerError(fmt.Sprintf("Teacher schedule: %v", err))
 			return model.TeacherSchedules{}, err
 		}
 
