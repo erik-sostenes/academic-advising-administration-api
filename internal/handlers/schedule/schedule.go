@@ -12,7 +12,7 @@ import (
 type ScheduleHandler interface {
 	// HandlerCreateTeacherSchedule http handler which is responsible for creating a teacher schedule via request
 	HandlerCreateTeacherSchedule(schedule.ScheduleService) echo.HandlerFunc
-	// HandlerGetTeacherSchedule http http that is responsible for responding to all the schedules that a teacher has
+	// HandlerGetTeacherSchedule http that is responsible for responding to all the schedules that a teacher has
 	HandlerGetTeacherSchedule(schedule.ScheduleService) echo.HandlerFunc
 }
 

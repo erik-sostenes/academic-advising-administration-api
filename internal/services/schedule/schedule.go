@@ -14,7 +14,7 @@ import (
 type ScheduleService interface {
 	// CreateSchedule create a new model.MockSchedule 
 	CreateSchedule(ctx context.Context, scheduleAt, fromDate, toDate, teacherTuition string) error 
-	// StoreGetSchedulesByTeacherTuition  returns a model.MockTeacherSchedules and error
+	// GetSchedulesByTeacherTuition  returns a model.MockTeacherSchedules and error
 	GetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive string) (model.TeacherSchedules, error)
 }
 
