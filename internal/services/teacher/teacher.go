@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
-	"github.com/itsoeh/academy-advising-administration-api/internal/repository/teacher"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository/teacher"
 )
 // TeacherService contains the methods that are responsible for verifying that the business logic is correct 
 type TeacherService interface {

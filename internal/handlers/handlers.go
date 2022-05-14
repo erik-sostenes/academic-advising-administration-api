@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"github.com/itsoeh/academy-advising-administration-api/internal/handlers/schedule"
-	"github.com/itsoeh/academy-advising-administration-api/internal/handlers/teacher"
-	"github.com/itsoeh/academy-advising-administration-api/internal/handlers/user"
+	"github.com/itsoeh/academic-advising-administration-api/internal/handlers/schedule"
+	"github.com/itsoeh/academic-advising-administration-api/internal/handlers/teacher"
+	"github.com/itsoeh/academic-advising-administration-api/internal/handlers/user"
 
 )
 

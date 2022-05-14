@@ -3,8 +3,8 @@ package teacher
 import (
 	"net/http"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
-	"github.com/itsoeh/academy-advising-administration-api/internal/services/teacher"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/services/teacher"
 	"github.com/labstack/echo/v4"
 )
 // TeacherHandler contains all the http handlers to receive requests and responses from the teacher lookup

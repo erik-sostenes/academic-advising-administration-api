@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
 )
 
 // TeacherStorer interface containing the methods to interact with the MySQL database
