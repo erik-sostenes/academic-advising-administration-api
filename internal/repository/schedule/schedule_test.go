@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/itsoeh/academy-advising-administration-api/internal/model"
-	"github.com/itsoeh/academy-advising-administration-api/internal/repository"
+	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository"
 )
 
 var testScheduleRepositoryCreateSchedule = struct{
