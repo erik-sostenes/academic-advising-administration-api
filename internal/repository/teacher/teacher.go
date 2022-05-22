@@ -46,7 +46,9 @@ func (s *teacherStorer) StorageFindTechers(ctx context.Context, subjectId, unive
 		var teacherCard model.TeacherCard
 
 		if err := rows.Scan(
+			&teacherCard.Tuition,
 			&teacherCard.Name,
+			&teacherCard.Surnames,
 			&teacherCard.Email,
 			&teacherCard.IsActive,
 			&teacherCard.Cubicle,

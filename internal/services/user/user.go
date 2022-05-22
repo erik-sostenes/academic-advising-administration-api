@@ -11,9 +11,9 @@ import (
 // and give authorization to the user, if it meets all the requirements
 type UserService interface {
 	// GetStudentPasswordByTuition method that checks if the student meets all the requirements
-	GetStudentPasswordByTuition(ctx context.Context, tuition, email, password string) (string, error)
+	GetStudentPasswordByTuition(ctx context.Context, tuition, email, password string) (model.Authorization, error)
 	// GetTeacherPasswordByTuition method that verifying if it teacher meets all the requirements
-	GetTeacherPasswordByTuition(ctx context.Context, tuition, email, password string) (string, error)
+	GetTeacherPasswordByTuition(ctx context.Context, tuition, email, password string) (model.Authorization, error)
 }
 // userService implements the UserService interface
 type userService struct {
@@ -30,50 +30,51 @@ func NewUserService(userStorer user.UserStorer) UserService {
 	}
 }
 
-func (s *userService) GetStudentPasswordByTuition(ctx context.Context, tuition, email, password string) (tokenString string, err error) {
+func (s *userService) GetStudentPasswordByTuition(ctx context.Context, tuition, email, password string) (model.Authorization, error) {
 	mockLogin, err := model.NewMockLogin(tuition, email, password)	
 	if err != nil {
-		return 
+		return model.Authorization{}, err
 	}
 	
-	password, err = s.userStorer.StorageGetStudentPaswordByTuition(ctx, mockLogin.Tuition())
+	userCredentials, err := s.userStorer.StorageGetStudentPaswordByTuition(ctx, mockLogin.Tuition())
 	if err != nil {
-		return
+		return model.Authorization{}, err
 	}
 	
-	if err = s.encrytor.ValidatePassword(password, mockLogin.Password()); err != nil {
-		return
+	if err = s.encrytor.ValidatePassword(userCredentials.Password, mockLogin.Password()); err != nil {
+		return model.Authorization{}, err
 	}
 	
-	tokenString, err = s.token.GeterateToken(mockLogin.Email())	
+	tokenString, err := s.token.GeterateToken(mockLogin.Email())	
 	if err != nil {
-		return 
+		return model.Authorization{}, err
 	}
-
-	return 
+	userCredentials.Token = tokenString
+	return userCredentials, err
 }
 
-func (s *userService) GetTeacherPasswordByTuition(ctx context.Context, tuition, email, password string) (tokenString string, err error) {
+func (s *userService) GetTeacherPasswordByTuition(ctx context.Context, tuition, email, password string) (model.Authorization, error) {
 		mockLogin, err := model.NewMockLogin(tuition, email, password)	
 	if err != nil {
-		return 
+		return model.Authorization{}, err
 	}
 	
-	password, err = s.userStorer.StorageGetTeacherPasswordByTuition(ctx, mockLogin.Tuition())
+	userCredentials, err := s.userStorer.StorageGetTeacherPasswordByTuition(ctx, mockLogin.Tuition())
 	if err != nil {
-		return
+		return model.Authorization{}, err
 	}
 	
-	if err = s.encrytor.ValidatePassword(password, mockLogin.Password()); err != nil {
-		return
+	if err = s.encrytor.ValidatePassword(userCredentials.Password, mockLogin.Password()); err != nil {
+		return model.Authorization{}, err
 	}
 	
-	tokenString, err = s.token.GeterateToken(mockLogin.Email())	
+	tokenString, err := s.token.GeterateToken(mockLogin.Email())	
 	if err != nil {
-		return 
+		return model.Authorization{}, err
 	}
 
-	return 
+	userCredentials.Token = tokenString
+	return userCredentials, err
 }
 
 
