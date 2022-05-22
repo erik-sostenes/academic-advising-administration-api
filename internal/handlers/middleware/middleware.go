@@ -15,7 +15,7 @@ func Authentication(next echo.HandlerFunc) echo.HandlerFunc {
 		token := services.Token{}
 
 		if err := token.ValidateToken(tokenString); err != nil {
-			return echo.NewHTTPError(http.StatusForbidden, model.Response{"error:" : err.Error()})
+			return echo.NewHTTPError(http.StatusForbidden, model.Response{"error" : err.Error()})
 		}
 
 		return next(c)

@@ -4,7 +4,9 @@ var (
 	// selectTeachersByCareerAndSubject sql query to find all teachers by career and subject
 	selectTeachersByCareerAndSubject = `
 		SELECT
+			t.tuition,
 			t.name,
+			t.surnames,
 			t.email,
 			t.is_active,
 			c.cubicle,

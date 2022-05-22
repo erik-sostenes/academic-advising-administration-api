@@ -23,14 +23,16 @@ type(
 	
 	// TeacherCard represents a teacher card 	
 	TeacherCard struct {
+		Tuition               string  `json:"tuition"`
 		Name                  string  `json:"name"`
+		Surnames              string  `json:"surnames"`
 		Email                 string  `json:"email"`
 		IsActive              bool    `json:"is_active"`
 		Cubicle               string  `json:"cubicle"`
-		SubjectId             string  `subject_id`
-		UniversityCourseId    string  `university_course_id`
-		SubcoordinatorTuition string  `subcoordinator_tuition`
-		CoordinatorTuition    string  `coordinator_tuition`
+		SubjectId             string  `json:"subject_id"`
+		UniversityCourseId    string  `json:"university_course_id"`
+		SubcoordinatorTuition string  `json:"subcoordinator_tuition"`
+		CoordinatorTuition    string  `json:"coordinator_tuition"`
 	}
 	// TeacherCards collection of TeacherCard
 	TeacherCards []TeacherCard
@@ -40,6 +42,12 @@ type(
 		Tuition  string `json:"tuition"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
+	}
+	// Authorization
+	Authorization struct {
+		Tuition  string `json:"tuition"`
+		Password string `json:"password"`
+		Token    string `json:"token"`
 	}
 	// Response map used for http response error
 	Response map[string] interface{}

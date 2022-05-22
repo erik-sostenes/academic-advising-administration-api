@@ -50,8 +50,8 @@ func (s *server) SetAllEndpoints() {
 	route.POST("/create", a.Authentication(h.Schedule.HandlerCreateTeacherSchedule(s.scheduleService)))
 	route.GET("/get/:teacher_id/:is_active", a.Authentication(h.Schedule.HandlerGetTeacherSchedule(s.scheduleService)))
 
-	route.GET("/student-authorization", h.User.StudentLoginHandler(s.userService))
-	route.GET("/teacher-authorization", h.User.TeacherLoginHandler(s.userService))
+	route.GET("/student-authorization/:tuition/:email/:password", h.User.StudentLoginHandler(s.userService))
+	route.GET("/teacher-authorization/:tuition/:email/:password", h.User.TeacherLoginHandler(s.userService))
 
 	route.GET("/find-teachers/:subject_id/:university_course_id", a.Authentication(
 		h.Teacher.HandlerFindTeachersByCareerAndSubject(s.teacherService),

@@ -25,13 +25,7 @@ func NewUserHandler() UserHandler {
 
 func (*userHandler) StudentLoginHandler(services user.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userLogin := &model.Login{}
-		
-		if err := c.Bind(userLogin); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, model.Response{"error": "The user login structure is wrong."})
-		}
-
-		stringToken, err :=  services.GetStudentPasswordByTuition(c.Request().Context(), userLogin.Tuition, userLogin.Email, userLogin.Password)	
+		userCredentials, err :=  services.GetStudentPasswordByTuition(c.Request().Context(), c.Param("tuition"), c.Param("email"), c.Param("password"))	
 
 		if _, ok := err.(model.InternalServerError); ok {
 			return echo.NewHTTPError(http.StatusInternalServerError, model.Response{"error": err.Error()})
@@ -45,19 +39,13 @@ func (*userHandler) StudentLoginHandler(services user.UserService) echo.HandlerF
 		if _, ok := err.(model.Forbidden); ok {
 			return echo.NewHTTPError(http.StatusNotFound, model.Response{"error": err.Error()})
 		}
-		return c.JSON(http.StatusOK, model.Response{"token": stringToken})	
+		return c.JSON(http.StatusOK, model.Response{"data": userCredentials})	
 	}
 }
 
 func (*userHandler) TeacherLoginHandler(services user.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userLogin := &model.Login{}
-		
-		if err := c.Bind(userLogin); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, model.Response{"error": "The user login structure is wrong."})
-		}
-
-		stringToken, err :=  services.GetStudentPasswordByTuition(c.Request().Context(), userLogin.Tuition, userLogin.Email, userLogin.Password)	
+		userCredentials, err :=  services.GetStudentPasswordByTuition(c.Request().Context(), c.Param("tuition"), c.Param("email"), c.Param("password"))	
 
 		if _, ok := err.(model.InternalServerError); ok {
 			return echo.NewHTTPError(http.StatusInternalServerError, model.Response{"error": err.Error()})
@@ -71,6 +59,6 @@ func (*userHandler) TeacherLoginHandler(services user.UserService) echo.HandlerF
 		if _, ok := err.(model.Forbidden); ok {
 			return echo.NewHTTPError(http.StatusNotFound, model.Response{"error": err.Error()})
 		}
-		return c.JSON(http.StatusOK, model.Response{"token": stringToken})	
+		return c.JSON(http.StatusOK, model.Response{"data": userCredentials})	
 	}
 }

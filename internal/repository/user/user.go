@@ -12,9 +12,9 @@ import (
 // UserStorer interface containing the methods to interact with the MySQL database
 type UserStorer interface {
 	// StorageGetStudentPasswordByTuition method to get a student password
-	StorageGetStudentPaswordByTuition(ctx context.Context, tuition string) (string, error)
+	StorageGetStudentPaswordByTuition(ctx context.Context, tuition string) (model.Authorization, error)
 	// StorageGetTeacherPasswordByTuition method to get a teacher password
-	StorageGetTeacherPasswordByTuition(ctx context.Context, tuition string) (string, error) 
+	StorageGetTeacherPasswordByTuition(ctx context.Context, tuition string) (model.Authorization, error) 
 }
 
 type userStorer struct {
@@ -28,36 +28,38 @@ func NewUserStorer(DB *sql.DB) UserStorer {
 	}
 }
 
-func (u *userStorer) StorageGetStudentPaswordByTuition(ctx context.Context, tuition string) (string, error) {
+func (u *userStorer) StorageGetStudentPaswordByTuition(ctx context.Context, tuition string) (model.Authorization, error) {
 	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
-	var password string
+	var user model.Authorization
+
 	if err := u.DB.QueryRowContext(queryCtx, selectStudentByTuition, tuition).Scan(
-		&password,
+		&user.Password, &user.Tuition,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			return "", model.NotFound(fmt.Sprintf("Student with tuition %s not found", tuition))
+			return model.Authorization{}, model.NotFound(fmt.Sprintf("Student with tuition %s not found", tuition))
   	}
-  	return "", model.InternalServerError(err.Error())
+  	return model.Authorization{}, model.InternalServerError(err.Error())
 	}
 
-	return password, nil 
+	return user, nil 
 }
 
-func (u *userStorer) StorageGetTeacherPasswordByTuition(ctx context.Context, tuition string) (string, error) {
+func (u *userStorer) StorageGetTeacherPasswordByTuition(ctx context.Context, tuition string) (model.Authorization, error) {
 	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
-	var password string
+	var user model.Authorization
+
 	if err := u.DB.QueryRowContext(queryCtx, selectTeacherByTuition, tuition).Scan(
-		&password,
+		&user.Password, &user.Tuition,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			return "", model.NotFound(fmt.Sprintf("Teacher with tuition %s not found", tuition))
+			return model.Authorization{}, model.NotFound(fmt.Sprintf("Teacher with tuition %s not found", tuition))
   	}
-  	return "",  model.InternalServerError(err.Error())
+  	return model.Authorization{},  model.InternalServerError(err.Error())
 	}
 
-	return password, nil 
+	return user, nil 
 }
