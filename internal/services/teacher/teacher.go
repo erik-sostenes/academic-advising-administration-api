@@ -11,6 +11,10 @@ import (
 type TeacherService interface {
 	// FindTeachers method that returns a collection of teachers with the requirements to be requested
 	FindTeachers(ctx context.Context, subjectId, universityCourseId string) (model.TeacherCards, error)
+	// FindStudentRequest
+	FindStudentRequests(ctx context.Context, teacherTuition string) (model.StudentRequests, error)
+	// FindStudentRequestsAccepted
+	FindStudentRequestsAccepted(ctx context.Context, teacherTuition string) (model.StudentRequestsAccepted, error)
 }
 // teacherService implements the TeacherService interface
 type teacherService struct {
@@ -29,6 +33,23 @@ func (s teacherService) FindTeachers(ctx context.Context, subjectId, universityC
 	}
 
 	return s.teacherStorer.StorageFindTechers(ctx, subjectId, universityCourseId)
+}
+
+func (s teacherService) FindStudentRequests(ctx context.Context, teacherTuition string) (model.StudentRequests, error) {
+	if strings.TrimSpace(teacherTuition) == ""{
+	return model.StudentRequests{}, model.StatusBadRequest("Please verify that the value of the ´teacher_tuition' field is correct.")
+	}
+
+	return s.teacherStorer.StorageFindStudentRequests(ctx, teacherTuition)
+}
+
+func (s teacherService) FindStudentRequestsAccepted(ctx context.Context, teacherTuition string) (model.StudentRequestsAccepted, error) {
+	if strings.TrimSpace(teacherTuition) == "" {
+	return model.StudentRequestsAccepted{}, model.StatusBadRequest("Please verify that the value of the ´teacher_tuition' field is correct.")
+
+	} 
+	
+	return s.teacherStorer.StorageFindStudentRequestsAccepted(ctx, teacherTuition)
 }
 
 // checkQueryParameters method that verifies the query parameters are correct
