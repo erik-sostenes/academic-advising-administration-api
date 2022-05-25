@@ -45,7 +45,7 @@ func (*userHandler) StudentLoginHandler(services user.UserService) echo.HandlerF
 
 func (*userHandler) TeacherLoginHandler(services user.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userCredentials, err :=  services.GetStudentPasswordByTuition(c.Request().Context(), c.Param("tuition"), c.Param("email"), c.Param("password"))	
+		userCredentials, err :=  services.GetTeacherPasswordByTuition(c.Request().Context(), c.Param("tuition"), c.Param("email"), c.Param("password"))	
 
 		if _, ok := err.(model.InternalServerError); ok {
 			return echo.NewHTTPError(http.StatusInternalServerError, model.Response{"error": err.Error()})

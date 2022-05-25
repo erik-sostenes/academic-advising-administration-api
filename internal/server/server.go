@@ -47,13 +47,29 @@ func (s *server) SetAllEndpoints() {
 
 	route := s.engine.Group("/v1/itsoeh/academic-advising-administration-api")
 
-	route.POST("/create", a.Authentication(h.Schedule.HandlerCreateTeacherSchedule(s.scheduleService)))
-	route.GET("/get/:teacher_id/:is_active", a.Authentication(h.Schedule.HandlerGetTeacherSchedule(s.scheduleService)))
-
-	route.GET("/student-authorization/:tuition/:email/:password", h.User.StudentLoginHandler(s.userService))
-	route.GET("/teacher-authorization/:tuition/:email/:password", h.User.TeacherLoginHandler(s.userService))
-
+	// user login
+	route.GET("/student-authorization/:tuition/:email/:password",
+		h.User.StudentLoginHandler(s.userService),
+	)
+	route.GET("/teacher-authorization/:tuition/:email/:password",
+		h.User.TeacherLoginHandler(s.userService),
+	)
+	// schedule teacher
 	route.GET("/find-teachers/:subject_id/:university_course_id", a.Authentication(
 		h.Teacher.HandlerFindTeachersByCareerAndSubject(s.teacherService),
 	))
+	// teachers
+	route.GET("/student-requests/:teacher_tuition", a.Authentication(
+		h.Teacher.HandlerFindStudentRequests(s.teacherService),
+	))
+
+	route.GET("/student-requests-accepted/:teacher_tuition", a.Authentication(
+		h.Teacher.HandlerFindStudentRequestsAccepted(s.teacherService),
+	))
+	route.POST("/create", a.Authentication(
+		h.Schedule.HandlerCreateTeacherSchedule(s.scheduleService)),
+	)
+	route.GET("/get/:teacher_id/:is_active", a.Authentication(
+		h.Schedule.HandlerGetTeacherSchedule(s.scheduleService)),
+	)
 }

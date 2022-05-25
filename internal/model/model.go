@@ -34,6 +34,32 @@ type(
 		SubcoordinatorTuition string  `json:"subcoordinator_tuition"`
 		CoordinatorTuition    string  `json:"coordinator_tuition"`
 	}
+
+	// StudentRequest represents the requests of all the students who have asked him to take an advisory
+	StudentRequest struct {
+		Tuition           string `json:"tuition"`
+		Name              string `json:"name"`
+		Email             string `json:"email"`
+		CubicleNumber     uint16 `json:"cubicle_number"`
+		Subject           string `json:"subject"`
+		BuildingNumber    string `json:"building_number"`
+		AdvisoryId        string `json:"advisory_id"`
+		TeacherScheduleId string `json:"teacher_schedule_id"`
+	}
+	// StudentRequests collection of StudentRequest
+	StudentRequests []StudentRequest 
+	
+	StudentRequestAccepted struct {
+		Tuition          string `json:"tuition"`
+		Name             string `json:"name"`
+		Email            string `json:"email"`
+		CubicleNumber    uint16 `json:"cubicle"`
+		Subject          string `json:"subject"`
+		UniversityCourse string `json:"university_course"`
+	}
+	//StudentRequestsAccepted
+	StudentRequestsAccepted []StudentRequestAccepted
+
 	// TeacherCards collection of TeacherCard
 	TeacherCards []TeacherCard
 
