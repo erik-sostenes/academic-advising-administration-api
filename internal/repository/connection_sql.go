@@ -10,22 +10,23 @@ import (
 )
 
 var (
-	once sync.Once
+	onceMySQL sync.Once
 	sqlConnection *sql.DB
 )
 
-func LoadSqlConnection() (*sql.DB, error) {
+// LoadMySQLConnection create the connection to MYSQL 
+func LoadMySQLConnection() (*sql.DB, error) {
 	var err error
 
-	once.Do(func() {
-		driverName := "mysql"
+	onceMySQL.Do(func() {
+		driverName := os.Getenv("MYSQL_DRIVER")
 
 		url := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s",
 			"root",
-			os.Getenv("DB_PASSWORD"),
-			os.Getenv("DB_HOST"),
-			"3306",
+			os.Getenv("MYSQL_PASSWORD"),
+			os.Getenv("MYSQL_HOST"),
+			os.Getenv("MYSQL_PORT"),
 			"advisories",
 		)
 		sqlConnection, err = sql.Open(driverName, url)
@@ -37,8 +38,9 @@ func LoadSqlConnection() (*sql.DB, error) {
 	return sqlConnection, err
 }
 
-func NewDB() *sql.DB {
-	db, err := LoadSqlConnection()
+// NewMySQL create the MySQL instance 
+func NewMySQL() *sql.DB {
+	db, err := LoadMySQLConnection()
 	if err != nil {
 		panic(err)
 	}

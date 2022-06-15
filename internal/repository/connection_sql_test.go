@@ -2,8 +2,9 @@ package repository
 
 import "testing"
 
-func TestNewDB(t *testing.T) {
-	db, err := LoadSqlConnection()
+// TestNewMySQL MySQL instance unit test
+func TestNewMySQL(t *testing.T) {
+	db, err := LoadMySQLConnection()
 	if err != nil {
 		t.Fatalf("Failed connection to MySQL")
 	}
