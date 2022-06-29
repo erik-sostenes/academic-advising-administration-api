@@ -3,44 +3,42 @@ package teacher
 import (
 	"context"
 	"database/sql"
-	"log"
+	"encoding/json"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/itsoeh/academic-advising-administration-api/internal/model"
 )
 
-// TeacherStorer interface containing the methods to interact with the MySQL database
+// TeachersStorer interface containing the methods to interact with the storage
 type TeacherStorer interface {
-	// StorageFindTechers method that seeks teachers with the requirements that are needed  
+	// StorageFindTechers method that seeks teachers with the requirements that are needed
 	StorageFindTechers(ctx context.Context, subjectId, universityCourseId string) (model.TeacherCards, error)
-	// StorageFindStudentRequest method that obtains the requests of all the students who have requested to take an advisory
-	StorageFindStudentRequests(ctx context.Context, teacherTuition string) (model.StudentRequests, error)
-	// StorageFindStudentRequestsAccepted
-	StorageFindStudentRequestsAccepted(ctx context.Context, teacherTuition string) (model.StudentRequestsAccepted, error)
 }
+//go:generate  mockery --case=snake --outpkg=repositorymocks --output=internal/repository/repositorymocks
 
-// teacherStorer  implements TeacherStorer interface
-type teacherStorer struct {
+// slqTeacherStorer implements TeacherStorer interface
+type slqTeacherStorer struct {
 	DB *sql.DB
 }
 
-// NewTeacherStorer returns a structure that implements the TeacherStorer interface
-func NewTeacherStorer(DB *sql.DB) TeacherStorer {
-	return &teacherStorer{
+// NewSQLTeacherStorer returns a structure that implements the TeacherStorer interface
+func NewSQLTeacherStorer(DB *sql.DB) TeacherStorer {
+	return &slqTeacherStorer{
 		DB: DB,
 	}
-} 
+}
 
-func (s *teacherStorer) StorageFindTechers(ctx context.Context, subjectId, universityCourseId string) (model.TeacherCards, error) {
-	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
+func (s *slqTeacherStorer) StorageFindTechers(ctx context.Context, subjectId, universityCourseId string) (model.TeacherCards, error) {
+	queryCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
 	rows, err := s.DB.QueryContext(queryCtx, selectTeachersByCareerAndSubject,
-		subjectId, 
+		subjectId,
 		universityCourseId,
 	)
 	defer rows.Close()
-	
+
 	if err != nil {
 		return model.TeacherCards{}, model.InternalServerError("An error has ocurred while obtainig the teachers.")
 	}
@@ -71,81 +69,54 @@ func (s *teacherStorer) StorageFindTechers(ctx context.Context, subjectId, unive
 		return teacherCards, model.InternalServerError(err.Error())
 	}
 
-	return teacherCards, err 
+	return teacherCards, err
 }
 
-func (s *teacherStorer) StorageFindStudentRequests(ctx context.Context, teacherTuition string) (model.StudentRequests, error) {
-	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
-	defer cancel()
-
-	rows, err := s.DB.QueryContext(queryCtx, selectStudentRequest, teacherTuition)
-	defer rows.Close()
-	
-	if err != nil {
-		return model.StudentRequests{}, model.InternalServerError("An error has ocurred while obtainig the student request.")
-	}
-
-	var studentRequests model.StudentRequests
-
-	for rows.Next() {
-		var studentRequest model.StudentRequest
-
-		if err := rows.Scan(
-			&studentRequest.Tuition,
-			&studentRequest.Name,
-			&studentRequest.Email,
-			&studentRequest.CubicleNumber,
-			&studentRequest.Subject,
-			&studentRequest.BuildingNumber,
-			&studentRequest.AdvisoryId,
-			&studentRequest.TeacherScheduleId,
-		); err != nil {
-			return model.StudentRequests{}, model.InternalServerError("Error when searching for the reques students.")
-		}
-		studentRequests = append(studentRequests, studentRequest)
-	}
-
-	if err := rows.Err(); err != nil {
-		return model.StudentRequests{}, model.InternalServerError(err.Error())
-	}
-
-	return studentRequests, err 
-
+// redisTeacherStorer implements TeacherStorer interface
+type redisTeacherStorer struct {
+	RDB *redis.Client
 }
 
-func (s *teacherStorer) StorageFindStudentRequestsAccepted(ctx context.Context, teacherTuition string) (model.StudentRequestsAccepted, error) {
-	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
-	defer cancel()
+// NewRedisTeacherStorer returns a structure that implements the TeacherStorer interface
+func NewRedisTeacherStorer(RDB *redis.Client) TeacherStorer {
+	return &redisTeacherStorer{
+		RDB: RDB,
+	}
+}
 
-	rows, err := s.DB.QueryContext(queryCtx, selectStudentRequestAccepted, teacherTuition)
-	defer rows.Close()
-	
+// StorageFindTechers data is cached (redis)
+func (r *redisTeacherStorer) StorageFindTechers(ctx context.Context, subjectId, universityCourseId string)(model.TeacherCards, error) {
+	var teacherCards model.TeacherCards
+
+	key := r.GenerateCacheKey(subjectId, universityCourseId)
+
+	value, err := r.RDB.Get(ctx, key).Result()
 	if err != nil {
-		return model.StudentRequestsAccepted{}, model.InternalServerError("An error has ocurred while obtainig the student request.")
+		return teacherCards, err
 	}
 
-	var studentRequestsAccepted model.StudentRequestsAccepted
+	err = json.Unmarshal([]byte(value), &teacherCards)
 
-	for rows.Next() {
-		var studentRequestAccepted model.StudentRequestAccepted
+	return teacherCards, err
+}
 
-		if err := rows.Scan(
-			&studentRequestAccepted.Tuition,
-			&studentRequestAccepted.Name,
-			&studentRequestAccepted.Email,
-			&studentRequestAccepted.CubicleNumber,
-			&studentRequestAccepted.Subject,
-			&studentRequestAccepted.UniversityCourse,
-		); err != nil {
-			log.Println(err)
-			return model.StudentRequestsAccepted{}, model.InternalServerError("Error when searching for the reques students.")
-		}
-		studentRequestsAccepted = append(studentRequestsAccepted, studentRequestAccepted)
+// StorageSaveCache encoding data and caches it with its unique key
+func (r *redisTeacherStorer) StorageSaveCache(ctx context.Context, key string, teacherCards model.TeacherCards) error{
+	b, err := json.Marshal(teacherCards)
+	if err != nil {
+		return err
 	}
 
-	if err := rows.Err(); err != nil {
-		return model.StudentRequestsAccepted{}, model.InternalServerError(err.Error())
-	}
+	return r.RDB.SetNX(ctx, key, string(b), time.Minute*10).Err()
+}
 
-	return studentRequestsAccepted, err 
+// ExistsKey checks if key exists in redis
+func (r *redisTeacherStorer) ExistsKey(ctx context.Context, key string) bool {
+	return r.RDB.Exists(ctx, key).Val() != 0
+}
+
+// GenerateCacheKey generates the cache key, which will serve as a unique identifier
+func (r *redisTeacherStorer) GenerateCacheKey(subjectId, universityCourseId string) string {
+	// key = teachers-available:by-subjectId-and-universityCourseId
+	return "teachers-available" + ":" + "by-" + subjectId + "-and-" + universityCourseId
 }
