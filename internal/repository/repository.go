@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 )
-
+// TODO: add comments
 type Type uint 
 
 const (

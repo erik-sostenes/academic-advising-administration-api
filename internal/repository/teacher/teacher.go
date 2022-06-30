@@ -8,8 +8,10 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository"
 )
 
+// TODO: add comments
 // TeacherStorer interface that find the teachers
 type TeacherStorer interface {
 	// Find method that seeks teachers with the requirements that are needed
@@ -19,13 +21,18 @@ type TeacherStorer interface {
 
 // slqTeacherStorer implements TeacherStorer interface
 type slqTeacherStorer struct {
-	DB *sql.DB
+	SQL *sql.DB
 }
 
 // NewSqlTeacherStorer returns a structure that implements the TeacherStorer interface
-func NewSqlTeacherStorer(DB *sql.DB) TeacherStorer {
-	return &slqTeacherStorer{
-		DB: DB,
+func NewSqlTeacherStorer(c repository.Configuration) TeacherStorer {
+	switch c.Type {
+	case repository.SQL:
+		return &slqTeacherStorer{
+			SQL: c.SQL,
+		}	
+	default:
+		panic("")
 	}
 }
 
@@ -33,7 +40,7 @@ func (s *slqTeacherStorer) Find(ctx context.Context, subjectId, universityCourse
 	queryCtx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 
-	rows, err := s.DB.QueryContext(queryCtx, selectTeachersByCareerAndSubject,
+	rows, err := s.SQL.QueryContext(queryCtx, selectTeachersByCareerAndSubject,
 		subjectId,
 		universityCourseId,
 	)
@@ -84,9 +91,14 @@ type cacheTeacherStorer struct {
 }
 
 // NewCacheTeacherStorer returns a structure that implements the CacheTeacherStorer interface
-func NewCacheTeacherStorer(RDB *redis.Client) CacheTeacherStorer {
-	return &cacheTeacherStorer{
-		RDB: RDB,
+func NewCacheTeacherStorer(c repository.Configuration) CacheTeacherStorer {
+	switch c.Type {
+		case repository.NoSQL:
+			return &cacheTeacherStorer {
+				RDB: c.NoSQL,
+			}
+		default: 
+			panic("")
 	}
 }
 
