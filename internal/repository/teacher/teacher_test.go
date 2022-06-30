@@ -12,9 +12,9 @@ import (
 
 func Test_TeacherStorer_StorageFindTechers(t *testing.T) {
 	t.Run("find successful teachers 'MySQL'", func(t *testing.T) {
-		teacherStorer := NewSQLTeacherStorer(repository.NewMySQL())
+		teacherStorer := NewSqlTeacherStorer(repository.NewMySQL())
 			
-		got, err := teacherStorer.StorageFindTechers(context.Background(), "B43B4F", "JDS7G7")
+		got, err := teacherStorer.Find(context.Background(), "B43B4F", "JDS7G7")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -26,9 +26,9 @@ func Test_TeacherStorer_StorageFindTechers(t *testing.T) {
 	})
 
 	t.Run("find successful teachers 'redis'", func(t *testing.T) {
-		teacherStorer := NewRedisTeacherStorer(repository.NewRedis())
+		teacherStorer := NewCacheTeacherStorer(repository.NewRedis())
 
-		got, err := teacherStorer.StorageFindTechers(context.TODO(), "HJHDS", "KNDJJ")
+		got, err := teacherStorer.Find(context.TODO(), "HJHDS", "KNDJJ")
 		if err != redis.Nil {
 			t.Fatal(err)
 		}
