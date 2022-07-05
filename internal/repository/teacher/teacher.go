@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -11,13 +12,12 @@ import (
 	"github.com/itsoeh/academic-advising-administration-api/internal/repository"
 )
 
-// TODO: add comments
 // TeacherStorer interface that find the teachers
 type TeacherStorer interface {
 	// Find method that seeks teachers with the requirements that are needed
 	Find(ctx context.Context, subjectId, universityCourseId string) (model.TeacherCards, error)
 }
-//go:generate  mockery --case=snake --outpkg=repositorymocks --output=repositorymocks --name=Storer
+//go:generate  mockery --case=snake --outpkg=repositorymocks --output=repositorymocks --name=TeacherStorer
 
 // slqTeacherStorer implements TeacherStorer interface
 type slqTeacherStorer struct {
@@ -32,7 +32,7 @@ func NewSqlTeacherStorer(c repository.Configuration) TeacherStorer {
 			SQL: c.SQL,
 		}	
 	default:
-		panic("")
+		panic(fmt.Sprintf("%T type is not supported", repository.SQL))
 	}
 }
 
@@ -98,11 +98,11 @@ func NewCacheTeacherStorer(c repository.Configuration) CacheTeacherStorer {
 				RDB: c.NoSQL,
 			}
 		default: 
-			panic("")
+			panic(fmt.Sprintf("%T type is not supported", repository.NoSQL))
 	}
 }
 
-// StorageFindTechers data is cached (redis)
+// Find data is cached (redis)
 func (r *cacheTeacherStorer) Find(ctx context.Context, subjectId, universityCourseId string)(teacherCards model.TeacherCards, err error) {
 	key := r.generateKey(subjectId, universityCourseId)
 
@@ -118,6 +118,11 @@ func (r *cacheTeacherStorer) Find(ctx context.Context, subjectId, universityCour
 
 func (r *cacheTeacherStorer) Save(ctx context.Context, subjectId, universityCourseId string, teacherCards model.TeacherCards) (err error){
 	key := r.generateKey(subjectId, universityCourseId)
+
+	if r.RDB.Exists(ctx, key).Val() == 0 {
+		return 
+	}
+
 	data, err := json.Marshal(teacherCards)
 	if err != nil {
 		return
