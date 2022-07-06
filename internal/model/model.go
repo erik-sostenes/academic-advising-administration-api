@@ -52,7 +52,7 @@ type(
 	// StudentRequests collection of StudentRequest
 	StudentRequests []StudentRequest 
 	
-	StudentRequestAccepted struct {
+	StudentAcceptedRequest struct {
 		Tuition          string `json:"tuition"`
 		Name             string `json:"name"`
 		Email            string `json:"email"`
@@ -60,8 +60,8 @@ type(
 		Subject          string `json:"subject"`
 		UniversityCourse string `json:"university_course"`
 	}
-	//StudentRequestsAccepted
-	StudentRequestsAccepted []StudentRequestAccepted
+	//StudentAcceptedRequests
+	StudentAcceptedRequests []StudentAcceptedRequest
 
 
 	// Login represents the access structure that a user must have
