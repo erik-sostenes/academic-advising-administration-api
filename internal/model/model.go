@@ -35,6 +35,9 @@ type(
 		CoordinatorTuition    string  `json:"coordinator_tuition"`
 	}
 
+	// TeacherCards collection of TeacherCard
+	TeacherCards []TeacherCard
+
 	// StudentRequest represents the requests of all the students who have asked him to take an advisory
 	StudentRequest struct {
 		Tuition           string `json:"tuition"`
@@ -49,7 +52,7 @@ type(
 	// StudentRequests collection of StudentRequest
 	StudentRequests []StudentRequest 
 	
-	StudentRequestAccepted struct {
+	StudentAcceptedRequest struct {
 		Tuition          string `json:"tuition"`
 		Name             string `json:"name"`
 		Email            string `json:"email"`
@@ -57,11 +60,9 @@ type(
 		Subject          string `json:"subject"`
 		UniversityCourse string `json:"university_course"`
 	}
-	//StudentRequestsAccepted
-	StudentRequestsAccepted []StudentRequestAccepted
+	//StudentAcceptedRequests
+	StudentAcceptedRequests []StudentAcceptedRequest
 
-	// TeacherCards collection of TeacherCard
-	TeacherCards []TeacherCard
 
 	// Login represents the access structure that a user must have
 	Login struct {
