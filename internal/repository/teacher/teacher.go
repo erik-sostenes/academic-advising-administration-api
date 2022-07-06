@@ -119,10 +119,6 @@ func (r *cacheTeacherStorer) Find(ctx context.Context, subjectId, universityCour
 func (r *cacheTeacherStorer) Save(ctx context.Context, subjectId, universityCourseId string, teacherCards model.TeacherCards) (err error){
 	key := r.generateKey(subjectId, universityCourseId)
 
-	if r.RDB.Exists(ctx, key).Val() == 0 {
-		return 
-	}
-
 	data, err := json.Marshal(teacherCards)
 	if err != nil {
 		return

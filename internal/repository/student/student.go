@@ -172,7 +172,7 @@ func (r *cacheStudentStorer) SaveRequests(ctx context.Context, teacherTuition st
 }
 
 func (r *cacheStudentStorer) SaveAcceptedRequests(ctx context.Context, teacherTuition string, studentRequestsAccepted model.StudentAcceptedRequests) (err error) {
-	key := r.generateKey(teacherTuition, false)
+	key := r.generateKey(teacherTuition, true)
 
 	data, err := json.Marshal(studentRequestsAccepted)
 	if err != nil {
