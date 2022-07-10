@@ -82,6 +82,8 @@ type CacheTeacherStorer interface {
 	TeacherStorer
 	// Save encoding data and caches it with its unique key
 	Save(ctx context.Context, subjectId, universityCourseId string, teacherCards model.TeacherCards) error
+	//Delete method used to delete each mock created in the unit tests
+	Delete(ctx context.Context, subjectId, univerisityCourseId string) error
 }
 //go:generate  mockery --case=snake --outpkg=repositorymocks --output=repositorymocks --name=CacheStorer
 
@@ -116,19 +118,23 @@ func (r *cacheTeacherStorer) Find(ctx context.Context, subjectId, universityCour
 	return
 }
 
-func (r *cacheTeacherStorer) Save(ctx context.Context, subjectId, universityCourseId string, teacherCards model.TeacherCards) (err error){
+func (r *cacheTeacherStorer) Save(ctx context.Context, subjectId, universityCourseId string, teacherCards model.TeacherCards) error {
 	key := r.generateKey(subjectId, universityCourseId)
 
 	data, err := json.Marshal(teacherCards)
 	if err != nil {
-		return
+		return err
 	}
 
 	return r.RDB.SetNX(ctx, key, string(data), time.Minute * 10).Err()
 }
 
+func (r cacheTeacherStorer) Delete(ctx context.Context, subjectId, univerisityCourseId string) error {
+	return r.RDB.Del(ctx, r.generateKey(subjectId, univerisityCourseId)).Err()
+}
+
 // generateKey generates the cache key, which will serve as a unique identifier
 func (r *cacheTeacherStorer) generateKey(subjectId, universityCourseId string) string {
 	// key = teachers-available:by-subjectId-and-universityCourseId
-	return "teachers-available" + ":" + "by-" + subjectId + "-and-" + universityCourseId
+	return fmt.Sprintf("teachers-available:by-%v-and-%v", subjectId, universityCourseId)
 }

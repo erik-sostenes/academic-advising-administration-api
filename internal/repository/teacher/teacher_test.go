@@ -10,67 +10,107 @@ import (
 	"github.com/itsoeh/academic-advising-administration-api/internal/repository"
 )
 
-func Test_TeacherStorer_Find(t *testing.T) {
-	var testTeacherStorer = map[string]struct{
-		teacherStorer      TeacherStorer 
+func TestTeacherStorer_Find(t *testing.T) {
+	SQL := repository.NewMySQL()
+
+	teacherStorer := NewSqlTeacherStorer(
+		repository.Configuration {
+			Type: repository.SQL,
+			SQL: SQL,
+		},
+	)
+	
+	t.Cleanup(func() {
+		SQL.Close()
+	})
+
+	var tsc = map[string]struct{
 		subjectId          string
 		universityCourseId string
 		expectedType       model.TeacherCards
 		expectedError      error
 	} {
 		"find successful teachers 'MySQL'": {
-			teacherStorer: NewSqlTeacherStorer(
-				repository.Configuration{
-					Type: repository.SQL,
-					SQL: repository.NewMySQL(),
-				},
-			),
 			subjectId: "JFDSKR342",
 			universityCourseId: "EWJHGSH",
 			expectedError: nil,
 		},
 		"find successful teachers 'Redis'": {
-			teacherStorer: NewCacheTeacherStorer(
-				repository.Configuration{
-					Type: repository.NoSQL,
-					NoSQL: repository.NewRedis(),
-				},
-			),
+			subjectId: "JFDSKR342",
+			universityCourseId: "EWJHGSH",
+			expectedError: nil,
+		},	
+	}
+
+	for name, ts := range tsc {
+		ts := ts
+		t.Run(name, func(t *testing.T) {
+			gotType, gotErr := teacherStorer.Find(context.TODO(), ts.subjectId, ts.universityCourseId)
+
+			assertNotError(t, ts.expectedError, gotErr)
+			
+			assertType(t, ts.expectedType, gotType)
+		})
+	}
+} 
+
+func TestCacheStudentStorer_Find(t *testing.T) {
+	NoSQL := repository.NewRedis()
+
+	teacherStorer := NewCacheTeacherStorer(
+		repository.Configuration {
+			Type: repository.NoSQL,
+			NoSQL: NoSQL,
+		},
+	)
+
+	var tsc = map[string]struct{
+		subjectId          string
+		universityCourseId string
+		expectedType       model.TeacherCards
+		expectedError      error
+	} {
+		"find successful teachers 'MySQL'": {
+			subjectId: "JFDSKR342",
+			universityCourseId: "EWJHGSH",
+			expectedError: redis.Nil,
+		},
+		"find successful teachers 'Redis'": {
 			subjectId: "JFDSKR342",
 			universityCourseId: "EWJHGSH",
 			expectedError: redis.Nil,
 		},	
 	}
-	for name, tt := range testTeacherStorer {
-		tt := tt
-		t.Run(name, func(t *testing.T) {
-			got, err := tt.teacherStorer.Find(context.TODO(), tt.subjectId, tt.universityCourseId)
-			if err != tt.expectedError {
-				t.Fatalf("expected error %v, got error %v", tt.expectedError, err)
-			}
 
-			if reflect.TypeOf(got) != reflect.TypeOf(tt.expectedType) {
-				t.Fatalf("expected %T, got %T", tt.expectedType, got)
-			}
+	for name, ts := range tsc {
+		ts := ts
+		t.Run(name, func(t *testing.T) {
+			gotType, gotErr := teacherStorer.Find(context.TODO(), ts.subjectId, ts.universityCourseId)
+
+			assertNotError(t, ts.expectedError, gotErr)
+			
+			assertType(t, ts.expectedType, gotType)
 		})
 	}
 } 
 
-func Test_CacheTeacherStorer_Save(t *testing.T) {
-	var testCacheTeacherStorer = map[string]struct {
-		cacheTeacherStorer CacheTeacherStorer
+func TestCacheTeacherStorer_Save(t *testing.T) {
+	NoSQL := repository.NewRedis()
+
+	cacheTeacherStorer := NewCacheTeacherStorer(
+		repository.Configuration {
+			Type: repository.NoSQL,
+			NoSQL: NoSQL,
+		},
+	)
+
+	var tsc = map[string]struct {
 		subjectId,
 		universityCourseId string
 		teacherCards       model.TeacherCards
 		expectedError      error
 	} {
 		"save successful teachers 'Redis' 1" : {
-			cacheTeacherStorer: NewCacheTeacherStorer (
-				repository.Configuration {
-					Type: repository.NoSQL,
-					NoSQL: repository.NewRedis(),
-				},
-			),
 			subjectId: "3J3N4",
 			universityCourseId: "7O3H",
 			teacherCards: []model.TeacherCard{
@@ -102,12 +142,6 @@ func Test_CacheTeacherStorer_Save(t *testing.T) {
 			expectedError: nil,
 		},
 		"save successful teachers 'Redis' 2" : {
-			cacheTeacherStorer: NewCacheTeacherStorer (
-				repository.Configuration {
-					Type: repository.NoSQL,
-					NoSQL: repository.NewRedis(),
-				},
-			),
 			subjectId: "H3HJ",
 			universityCourseId: "5H3H",
 			teacherCards: []model.TeacherCard{
@@ -140,16 +174,36 @@ func Test_CacheTeacherStorer_Save(t *testing.T) {
 		},
 	}
 
-	for name, tt := range testCacheTeacherStorer {
+	for name, ts := range tsc {
 		t.Run(name, func(t *testing.T) {
-			err := tt.cacheTeacherStorer.Save(context.TODO(),
-				tt.subjectId,
-				tt.universityCourseId,
-				tt.teacherCards,
+			gotErr := cacheTeacherStorer.Save(context.TODO(),
+				ts.subjectId,
+				ts.universityCourseId,
+				ts.teacherCards,
 			)
-			if err != tt.expectedError {
-				t.Fatalf("expected error %v, got error %v", tt.expectedError, err)
-			}
+			assertNotError(t, ts.expectedError, gotErr)
+
+			t.Cleanup(func() {
+				cacheTeacherStorer.Delete(context.TODO(), ts.subjectId, ts.universityCourseId)	
+			})
 		})
+	}
+}
+
+// assertNotError asserts that the error will be nil
+ func assertNotError(t testing.TB, expectedError, gotError error) {
+	t.Helper()
+
+	if expectedError != gotError {
+		t.Fatalf("expected error %v, got an error %v", expectedError, gotError)
+	}
+}
+
+// assertType asserts that the object is of the requested type
+func assertType(t testing.TB, expectedType, gotType interface{}) {
+	t.Helper()
+
+	if  reflect.TypeOf(expectedType) != reflect.TypeOf(gotType) {
+		t.Fatalf("expected %T, got %T", expectedType, gotType)
 	}
 }
