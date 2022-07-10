@@ -13,7 +13,7 @@ import (
 func TestStudentStorer_Find(t *testing.T) {
 	SQL := repository.NewMySQL()
 		
-	studentStorer := NewStudetnStorer(repository.Configuration{
+	studentStorer := NewStudetnStorer(repository.Configuration {
 		SQL: SQL,
 		Type: repository.SQL,
 	})
@@ -43,12 +43,12 @@ func TestStudentStorer_Find(t *testing.T) {
 			gotRequests, gotErr := studentStorer.FindRequests(context.TODO(), ts.teacherTuition)
 			assertNotError(t, ts.expectedError, gotErr)
 
-			asserType(t, ts.expectedStudentRequests, gotRequests)
+			assertType(t, ts.expectedStudentRequests, gotRequests)
 
 			gotAcceptedRequests, gotErr := studentStorer.FindAcceptedRequests(context.TODO(), ts.teacherTuition)
 			assertNotError(t, ts.expectedError, gotErr)
 
-			asserType(t, ts.expectedStudentAcceptedRequests, gotAcceptedRequests)
+			assertType(t, ts.expectedStudentAcceptedRequests, gotAcceptedRequests)
 		})
 	}
 }
@@ -82,12 +82,12 @@ func TestCacheStudentStorer_Find(t *testing.T) {
 			gotRequests, gotErr := studentStorer.FindRequests(context.TODO(), ts.teacherTuition)
 			assertNotError(t, ts.expectedError, gotErr)
 
-			asserType(t, ts.expectedStudentRequests, gotRequests)
+			assertType(t, ts.expectedStudentRequests, gotRequests)
 
 			gotAcceptedRequests, gotErr := studentStorer.FindAcceptedRequests(context.TODO(), ts.teacherTuition)
 			assertNotError(t, ts.expectedError, gotErr)
 
-			asserType(t, ts.expectedStudentAcceptedRequests, gotAcceptedRequests)
+			assertType(t, ts.expectedStudentAcceptedRequests, gotAcceptedRequests)
 		})
 	}
 }
@@ -102,12 +102,16 @@ func TestCacheStudentStorer_Save(t *testing.T) {
 
 	tsc := map[string] struct {
 		teacherTuition          string
+		saveRequests,
+		saveAcceptedRequests    bool
 		studentRequests 				model.StudentRequests
 		studentAcceptedRequests model.StudentAcceptedRequests
 		expectedError           error
 	}{
 		"Test 1: save successful student requests 'Redis'": {
 			teacherTuition: "some_teacher_tuition",
+			saveRequests: false,
+			saveAcceptedRequests: true,
 			studentRequests: model.StudentRequests{
 				model.StudentRequest {
 					Tuition:           "some_tuition_1",
@@ -152,6 +156,8 @@ func TestCacheStudentStorer_Save(t *testing.T) {
 		},
 		"Test 2: save successful student requests 'Redis'": {
 			teacherTuition: "some_teacher_tuition",
+			saveRequests: false,
+			saveAcceptedRequests: true,
 			studentRequests: model.StudentRequests{
 				model.StudentRequest {
 					Tuition:           "some_tuition_1",
@@ -198,17 +204,30 @@ func TestCacheStudentStorer_Save(t *testing.T) {
 
 	for name, ts := range tsc {
 		t.Run(name, func(t *testing.T) {
-			gotErr := studentStorer.SaveRequests(context.TODO(), ts.teacherTuition, ts.studentRequests)
+			gotErr := studentStorer.SaveRequests(context.TODO(),
+				ts.teacherTuition,
+				ts.saveRequests,
+				ts.studentRequests,
+			)
 			assertNotError(t, ts.expectedError, gotErr)
-
-			gotErr = studentStorer.SaveAcceptedRequests(context.TODO(), ts.teacherTuition, ts.studentAcceptedRequests)
+	
+			gotErr = studentStorer.SaveAcceptedRequests(context.TODO(),
+				ts.teacherTuition, 
+				ts.saveAcceptedRequests,
+				ts.studentAcceptedRequests,
+			)
 			assertNotError(t, ts.expectedError, gotErr)
+	
+			t.Cleanup(func() {
+				studentStorer.Delete(context.TODO(), ts.teacherTuition, ts.saveRequests)
+				studentStorer.Delete(context.TODO(), ts.teacherTuition, ts.saveAcceptedRequests)
+			})
 		})
 	}
 }
 
 // assertNotError asserts that the error will be nil
- func assertNotError(t testing.TB, expectedError, gotError error) {
+func assertNotError(t testing.TB, expectedError, gotError error) {
 	t.Helper()
 
 	if expectedError != gotError {
@@ -217,7 +236,7 @@ func TestCacheStudentStorer_Save(t *testing.T) {
 }
 
 // asserType asserts that the object is of the requested type
-func asserType(t testing.TB, expectedType, gotType interface{}) {
+func assertType(t testing.TB, expectedType, gotType interface{}) {
 	t.Helper()
 
 	if  reflect.TypeOf(expectedType) != reflect.TypeOf(gotType) {
