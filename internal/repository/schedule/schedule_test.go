@@ -2,7 +2,7 @@ package schedule
 
 import (
 	"context"
-	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/go-sql-driver/mysql"
@@ -47,10 +47,6 @@ func TestScheduleStorer_Save(t *testing.T) {
 		Type: repository.SQL,
 	})
 	
-	t.Cleanup(func() {
-		SQL.Close()
-	})
-	
 	for name, ts := range tsc {
 		t.Run(name, func(t *testing.T) {
 			schedule, gotErr := model.NewMockSchedule(
@@ -73,37 +69,38 @@ func TestScheduleStorer_Save(t *testing.T) {
 	}
 }
 
-var testScheduleRepositoryStoreGetSchedulesByTeacherTuition = map[string]struct{
-	teacherTuititon string
-	isActive        bool
-	expectedError   error
-	expectedType    model.MockTeacherSchedules
-}{
-	"Test 1. Get a listing of model.MockTeacherSchedules{} correctly.": {
-		teacherTuititon: "JFDSKR342",
-		isActive: true,
-		expectedError: nil,
-		expectedType: model.MockTeacherSchedules{},
-	},
-	"Test 2. Get a listing of model.MockTeacherSchedules{} correctly.": {
-		teacherTuititon: "JDK334222L",
-		isActive: false,
-		expectedError: nil,
-		expectedType: model.MockTeacherSchedules{},
-	},
-} 
-
-func Test_ScheduleRepository_StoreGetSchedulesByTeacherTuition(t *testing.T) {
-	for name, tt := range testScheduleRepositoryStoreGetSchedulesByTeacherTuition {
-		
+func TestScheduleStorer_Find(t *testing.T) {
+	var tsc = map[string]struct{
+		teacherId       string
+		isActive        bool
+		expectedError   error
+		expectedType    model.TeacherSchedules
+	}{
+		"Test 1: save successful schedule 'MySQL'": {
+			teacherId: "JFDSKR342",
+			isActive: true,
+			expectedError: nil,
+		},
+		"Test 2: save successful schedule 'MySQL'": {
+			teacherId: "JDK334222L",
+			isActive: false,
+			expectedError: nil,
+		},
+	} 
+	
+	SQL := repository.NewMySQL()
+	scheduleStorer := NewScheduleStorer(repository.Configuration{
+		SQL: SQL,
+		Type: repository.SQL,
+	})
+	
+	for name, ts := range tsc {	
 		t.Run(name, func(t *testing.T) {
-			DB := repository.NewDB()
-			rep := NewScheduleStorer(DB)
-			gotType, gotError := rep.StoreGetSchedulesByTeacherTuition(context.Background(), "APM73", true)
+			gotType, gotError := scheduleStorer.Find(context.Background(), ts.teacherId, ts.isActive)
 		
-			assertNotError(t, tt.expectedError, gotError)
+			assertNotError(t, ts.expectedError, gotError)
 			
-			asserType(t, tt.expectedType, gotType)
+			assertType(t, ts.expectedType, gotType)
 		})
 	}
 }
@@ -118,10 +115,10 @@ func Test_ScheduleRepository_StoreGetSchedulesByTeacherTuition(t *testing.T) {
 }
 
 // asserType asserts that the object is of the requested type
-func asserType(t testing.TB, expetedType, gotType interface{}) {
+func assertType(t testing.TB, expectedType, gotType interface{}) {
 	t.Helper()
 
-	if !(fmt.Sprintf("%T", expetedType) == fmt.Sprintf("%T", gotType)) {
-		t.Fatalf("expected structure of type %T, got structure of type %T", expetedType, gotType)
+	if  reflect.TypeOf(expectedType) != reflect.TypeOf(gotType) {
+		t.Fatalf("expected %T, got %T", expectedType, gotType)
 	}
 }
