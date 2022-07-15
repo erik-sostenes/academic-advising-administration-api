@@ -5,43 +5,72 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/itsoeh/academic-advising-administration-api/internal/model"
 	"github.com/itsoeh/academic-advising-administration-api/internal/repository"
 )
 
-var testScheduleRepositoryCreateSchedule = struct{
-	name            string
-	scheduleId      string
-	scheduleAt      string
-	fromDate        string
-	toDate          string
-	teacherTuititon string
-	errExpect       error
-}{
-		name: "Test 1. StatusBadRequest: Invalid Fields Error",
-		scheduleId: "ea58a0bc-c3a6-11ec-9d64-0242ac120002",
-		scheduleAt: "2006-01-20 15:04:05",
-		fromDate: "2006-01-02 15:04:05",
-		toDate: "2006-01-02 15:04:05",
-		teacherTuititon: "APM7392HH",
-}
+func TestScheduleStorer_Save(t *testing.T) {
+	var tsc = map[string]struct{
+		schedule            model.Schedule
+		expectedError       error
+		expectedMySQLError  *mysql.MySQLError
+	}{
+		"Test 1: Save 'MySQL' schedule successful": {
+			schedule: model.Schedule {
+				ScheduleId: "ea58a0bc-c3a6-11ec-9d64-0242ac120002",
+				ScheduleAt: "2006-01-20 15:04:05",
+				FromDate: "2006-01-02 15:04:05",
+				ToDate: "2006-01-02 15:04:05",
+				StudentAccountant: 3,
+				TeacherTuition: "APM7392HH",
+			},
+			expectedError: nil,
+		},
+		"Test 2: Save 'MySQL' schedule successful": {
+			schedule: model.Schedule {
+				ScheduleId: "ea59a0bc-c3a6-11ec-9d64-0242ac120002",
+				ScheduleAt: "2006-01-20 15:04:05",
+				FromDate: "2006-01-02 15:04:05",
+				ToDate: "2006-01-02 15:04:05",
+				StudentAccountant: 34,
+				TeacherTuition: "APM7392HH",
+			},
+			expectedError: nil,
+		},
+	}		
 
-func Test_ScheduleRepository_CreateSchedule(t *testing.T) {
-	tt := testScheduleRepositoryCreateSchedule
-		
-	t.Run(tt.name, func(t *testing.T) {
-		schedule, gotErr := model.NewMockSchedule(tt.scheduleId, tt.scheduleAt, tt.fromDate, tt.toDate, tt.teacherTuititon, 0)
-	
-		assertNotError(t, nil, gotErr)
+	SQL := repository.NewMySQL()
 
-		DB := repository.NewDB()
-		rep := NewScheduleStorer(DB)
-		errExpect  := rep.StoreCreateSchedule(context.Background(), schedule)
-			
-		if _, ok := errExpect.(model.StatusBadRequest); !ok {
-			t.Fatalf("expected an error of type %T, got an error of type %T", model.StatusBadRequest("") ,errExpect)
-		}
+	scheduleStorer := NewScheduleStorer(repository.Configuration{
+		SQL: SQL,
+		Type: repository.SQL,
 	})
+	
+	t.Cleanup(func() {
+		SQL.Close()
+	})
+	
+	for name, ts := range tsc {
+		t.Run(name, func(t *testing.T) {
+			schedule, gotErr := model.NewMockSchedule(
+				ts.schedule.ScheduleId,
+				ts.schedule.ScheduleAt,
+				ts.schedule.FromDate,
+				ts.schedule.ToDate,
+				ts.schedule.TeacherTuition,
+				ts.schedule.StudentAccountant,
+			)	
+			assertNotError(t, ts.expectedError, gotErr)
+
+			gotError := scheduleStorer.Save(context.Background(), schedule)
+			
+			_, ok := gotError.(*mysql.MySQLError)
+			if !ok {
+				t.Fatalf("expected %v type error, got %v type error", ts.expectedMySQLError, gotError)
+			}
+		})
+	}
 }
 
 var testScheduleRepositoryStoreGetSchedulesByTeacherTuition = map[string]struct{
