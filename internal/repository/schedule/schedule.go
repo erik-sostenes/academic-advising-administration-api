@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/itsoeh/academic-advising-administration-api/internal/model"
+	"github.com/itsoeh/academic-advising-administration-api/internal/repository"
 )
 
 // ScheduleStorer interface containing the methods to interact with the MySQL database
 type ScheduleStorer interface {
-	// StoreCreateSchedule method that create a new teacher schedule 
-	StorageCreateSchedule(context.Context, model.MockSchedule) error
-	// StoreGetSchedulesByTeacherTuition method that gets a collection of teacher schedules by teacherId and if the schedule is active. 
-	StorageGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) (model.TeacherSchedules, error) 
+	// Save method that create a new teacher schedule 
+	Save(context.Context, model.MockSchedule) error
+	// Find method that gets a collection of teacher schedules by teacherId and if the schedule is active. 
+	Find(ctx context.Context, teacherId string, isActive bool) (model.TeacherSchedules, error) 
 }
 
 type scheduleStorer struct {
@@ -23,13 +23,18 @@ type scheduleStorer struct {
 }
 
 // NewScheduleStorer returns a structure that implements the ScheduleStorer interface
-func NewScheduleStorer(DB *sql.DB) ScheduleStorer {
-	return &scheduleStorer{
-		DB: DB,
-	}
+func NewScheduleStorer(c repository.Configuration) ScheduleStorer {
+	switch c.Type {
+	case repository.SQL:
+		return &scheduleStorer{
+			DB: c.SQL,
+		}
+	default:
+		panic(fmt.Sprintf("%T type is not supported", repository.SQL))
+	} 
 }
 
-func (s *scheduleStorer) StorageCreateSchedule(ctx context.Context, schedule model.MockSchedule) (err error) {
+func (s *scheduleStorer) Save(ctx context.Context, schedule model.MockSchedule) (err error) {
 	queryCTx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel() 
 
@@ -40,29 +45,10 @@ func (s *scheduleStorer) StorageCreateSchedule(ctx context.Context, schedule mod
 		schedule.ToDate(),
 		schedule.TeacherTuition(),
 	)
-	
-	if code, ok := err.(*mysql.MySQLError); ok {
-		//NOTE: Error Code: 1062. Duplicate entry 'value' for key 'schedule_at'
-		//NOTE: Error Code: 1452. Cannot add or update a child row: a foreign key constraint fails
-
-		if code.Number == 1062 {
-			err = model.StatusBadRequest(fmt.Sprintf("A schedule whith date %v was already found.", schedule.ScheduleAt()))
-			return
-		}
-		
-		if code.Number == 1452 {
-			err = model.StatusBadRequest("Check that all information fields of the schedule are correct.")
-			return
-		}
-		
-		err = model.InternalServerError("An error has occurred when adding a new schedule.")
-		return
-	}
-
 	return
 }
 
-func (s *scheduleStorer) 	StorageGetSchedulesByTeacherTuition(ctx context.Context, teacherId string, isActive bool) ( model.TeacherSchedules, error) {
+func (s *scheduleStorer) Find(ctx context.Context, teacherId string, isActive bool) (model.TeacherSchedules, error) {
 	queryCTx, cancel := context.WithTimeout(ctx, time.Second * 5)
 	defer cancel()
 	
@@ -70,7 +56,6 @@ func (s *scheduleStorer) 	StorageGetSchedulesByTeacherTuition(ctx context.Contex
 	defer rows.Close()
 
 	if err != nil {
-		err = model.InternalServerError("An error has ocurred while obtainig the teacher schedule.")
 		return model.TeacherSchedules{}, err
 	}
 	
@@ -90,12 +75,9 @@ func (s *scheduleStorer) 	StorageGetSchedulesByTeacherTuition(ctx context.Contex
 			&teacherSchedule.Schedule.StudentAccountant,
 			&teacherSchedule.Schedule.TeacherTuition,
 		); err != nil {
-			err = model.InternalServerError(fmt.Sprintf("Teacher schedule: %v", err))
 			return model.TeacherSchedules{}, err
 		}
-
 		teacherSchedules = append(teacherSchedules, teacherSchedule)
 	}
 	return teacherSchedules, err	
 } 
-

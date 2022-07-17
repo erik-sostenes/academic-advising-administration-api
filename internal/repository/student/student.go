@@ -114,9 +114,11 @@ func (s *studentStorer) FindAcceptedRequests(ctx context.Context, teacherTuition
 type CacheStudentStorer interface {
 	StudentStorer
 	// SaveRequests encoding student requests and caches it with its unique key
-	SaveRequests(ctx context.Context, teacherTuition string, studentRequests model.StudentRequests) error
+	SaveRequests(ctx context.Context, teacherTuition string, isAccepted bool, studentRequests model.StudentRequests) error
 	// SaveAcceptedRequests encoding student accepted requests and caches it with its unique key
-	SaveAcceptedRequests(ctx context.Context, teacherTuition string, studentRequests model.StudentAcceptedRequests) error
+	SaveAcceptedRequests(ctx context.Context, teacherTuition string, isAccepted bool, studentRequests model.StudentAcceptedRequests) error
+	//Delete method used to delete each mock created in the unit tests
+	Delete(ctx context.Context, subjectId string, isAccepted bool) error
 } 
 
 type cacheStudentStorer struct {
@@ -160,8 +162,8 @@ func (r *cacheStudentStorer) FindAcceptedRequests(ctx context.Context, teacherTu
 	return
 }
 
-func (r *cacheStudentStorer) SaveRequests(ctx context.Context, teacherTuition string, studentRequests model.StudentRequests) (err error) {
-	key := r.generateKey(teacherTuition, false)
+func (r *cacheStudentStorer) SaveRequests(ctx context.Context, teacherTuition string, isAccepted bool, studentRequests model.StudentRequests) (err error) {
+	key := r.generateKey(teacherTuition, isAccepted)
 
 	data, err := json.Marshal(studentRequests)
 	if err != nil {
@@ -171,8 +173,8 @@ func (r *cacheStudentStorer) SaveRequests(ctx context.Context, teacherTuition st
 	return r.RDB.SetNX(ctx, key, string(data), time.Minute * 10).Err()
 }
 
-func (r *cacheStudentStorer) SaveAcceptedRequests(ctx context.Context, teacherTuition string, studentRequestsAccepted model.StudentAcceptedRequests) (err error) {
-	key := r.generateKey(teacherTuition, true)
+func (r *cacheStudentStorer) SaveAcceptedRequests(ctx context.Context, teacherTuition string, isAccepted bool, studentRequestsAccepted model.StudentAcceptedRequests) (err error) {
+	key := r.generateKey(teacherTuition, isAccepted)
 
 	data, err := json.Marshal(studentRequestsAccepted)
 	if err != nil {
@@ -180,6 +182,10 @@ func (r *cacheStudentStorer) SaveAcceptedRequests(ctx context.Context, teacherTu
 	}
 
 	return r.RDB.SetNX(ctx, key, string(data), time.Minute * 10).Err()
+}
+
+func (r *cacheStudentStorer) Delete(ctx context.Context, subjectId string, isAccepted bool) error {
+	return r.RDB.Del(ctx, r.generateKey(subjectId, isAccepted)).Err()
 }
 
 // generateKey generates the cache key, which will serve as a unique identifier
