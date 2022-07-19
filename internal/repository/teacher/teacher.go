@@ -17,7 +17,7 @@ type TeacherStorer interface {
 	// Find method that seeks teachers with the requirements that are needed
 	Find(ctx context.Context, subjectId, universityCourseId string) (model.TeacherCards, error)
 }
-//go:generate  mockery --case=snake --outpkg=repositorymocks --output=repositorymocks --name=TeacherStorer
+//go:generate  mockery --case=snake --outpkg=repositorymocks --output=../repositorymocks/teacher --name=TeacherStorer
 
 // slqTeacherStorer implements TeacherStorer interface
 type slqTeacherStorer struct {
